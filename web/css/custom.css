@@ -1,0 +1,21 @@
+.btn-xl {
+  padding: 15px 20px 0px;
+  font-size: 60px;
+}
+
+.btn-calibrate {
+  font-size: 18px;
+}
+
+.display {
+  padding-top: 50px;
+  text-align: right;
+}
+
+#power {
+  font-size: 30px;
+}
+
+#temperature {
+  font-size: 90px;
+}
