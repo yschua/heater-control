@@ -3,29 +3,38 @@
   require "data.php";
 ?>
 
-<div class="container" role="main">
+<div class="container">
 
-  <div class="col-xs-7 display">
-    <!-- <div class="glyphicon glyphicon-fire power" <?php setHidden(); ?>></div> -->
-    <div id="temperature"><?php print $row->temperature; ?>&deg;</div>
-    <div id="power"><?php showPower(); ?></div>
-  </div>
-
-  <div class="col-xs-5">
-    <div class="btn-group-vertical">
-      <button type="button" class="btn btn-xl btn-default" value="increase" <?php disableButton(); ?>>
-        <span class="glyphicon glyphicon-triangle-top"></span>
-      </button>
-      <button type="button" class="btn btn-xl btn-default" value="decrease" <?php disableButton(); ?>>
-        <span class="glyphicon glyphicon-triangle-bottom"></span>
-      </button>
-      <button type="button" class="btn btn-xl btn-default" value="power">
-        <span class="glyphicon glyphicon-off"></span>
-      </button>
+  <h5>
+    Heater is
+    <div class="btn-group">
+      <a href="#" class="btn btn-primary">ON</a>
+      <a href="#" class="btn btn-default">OFF</a>
     </div>
-  </div>
+  </h5>
 
-</div> <!-- /container -->
+  <h5>
+    <div class="dropdown">
+      Thermostat set at
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+        <?php $tempCurr = 12.5; echo $tempCurr; ?> &deg;C <span class="caret"></span>
+      </button>
+
+      <ul class="dropdown-menu">
+        <?php
+          for ($temp = 10.0; $temp <= 20.0; $temp += 0.5) {
+            $str = ($temp == $tempCurr) ? '<li class="active">' : '<li>';
+            $str .= '<a href="#">';
+            $str .= number_format($temp, 1);
+            $str .= '</a></li>';
+            echo $str;
+          }
+        ?>
+      </ul>
+    </div>
+  </h5>
+
+</div>
 
 <?php
   require "footer.php";
