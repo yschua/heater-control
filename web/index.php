@@ -1,15 +1,17 @@
 <?php
   require "header.php";
-  require "data.php";
+  require "db.php";
 ?>
 
 <div class="container">
 
+  Current power is <?php echo GetCurrentPower() ? 'on' : 'off'; ?>
+
   <h5>
     Heater is
     <div class="btn-group">
-      <a href="#" class="btn btn-primary">ON</a>
-      <a href="#" class="btn btn-default">OFF</a>
+      <a href="#power-on" class="btn btn-primary btn-power">ON</a>
+      <a href="#power-off" class="btn btn-default btn-power">OFF</a>
     </div>
   </h5>
 
@@ -42,14 +44,15 @@
 
 <script>
   $(document).ready(function() {
-    $(".btn-xl").click(function() {
-      var url = "write_to_database.php";
-      var action = $(this).val();
-      data = {"action": action};
-      $.post(url, data, function(){
-        location.reload();
-      });
+    $(".btn-power").click(function() {
+      var url = "db_writer.php";
+      var action = $(this).attr("href");
+      var data = { "action": action };
+      var fnReload = function() { location.reload(); };
+
+      $.post(url, data, fnReload);
     });
   });
-  // reload on page active
+
+  // TODO reload on page active
 </script>

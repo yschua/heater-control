@@ -1,27 +1,21 @@
 <?php
   $dir = "sqlite:../db/home.db";
   $pdo = new PDO($dir);
-  $sql = "SELECT * FROM heater WHERE heater_id = 1";
-  $stmt = $pdo->query($sql);
+  $stmt = $pdo->query("SELECT * FROM heater WHERE heater_id = 1");
   $row = $stmt->fetchObject();
 
-  function setHidden() {
+  function GetCurrentPower() {
     global $row;
-    if (!$row->power)
-      print "style=\"visibility: hidden;\"";
+    return ($row->current_power == 1);
   }
 
-  function disableButton() {
-    global $row;
-    if (!$row->power)
-      print "disabled";
+  function SetCurrentPower($power) {
+    global $pdo;
+    $stmt = $pdo->prepare(GetUpdateSql("current_power", $power));
+    $stmt->execute();
   }
 
-  function showPower() {
-    global $row;
-    if ($row->power)
-      print "ON";
-    else
-      print "OFF";
+  function GetUpdateSql($field, $val) {
+    return sprintf("UPDATE heater set %s = %d WHERE heater_id = 1", $field, $val);
   }
 ?>
