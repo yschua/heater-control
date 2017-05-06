@@ -45,7 +45,7 @@
 <script>
   $(document).ready(function() {
     $(".btn-power").click(function() {
-      var url = "db_writer.php";
+      var url = "updatedb.php";
       var action = $(this).attr("href");
       var data = { "action": action };
       var fnReload = function() { location.reload(); };
