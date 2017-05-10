@@ -5,13 +5,18 @@
 
 <div class="container">
 
-  Current power is <?php echo GetCurrentPower() ? 'on' : 'off'; ?>
+  <?php
+    printf("current_power: %d<br>", GetCurrentPower());
+    printf("selected_power: %d<br>", GetSelectedPower());
+    printf("current_temperature: %.1f<br>", GetCurrentTemperature());
+    printf("selected_temperature: %.1f<br>", GetSelectedTemperature());
+  ?>
 
   <h5>
     Heater is
     <div class="btn-group">
-      <a href="#power-on" class="btn btn-primary btn-power">ON</a>
-      <a href="#power-off" class="btn btn-default btn-power">OFF</a>
+      <a href="#p-1" class="btn btn-primary btn-input">ON</a>
+      <a href="#p-0" class="btn btn-default btn-input">OFF</a>
     </div>
   </h5>
 
@@ -24,12 +29,12 @@
 
       <ul class="dropdown-menu">
         <?php
-          for ($temp = 10.0; $temp <= 20.0; $temp += 0.5) {
-            $str = ($temp == $tempCurr) ? '<li class="active">' : '<li>';
-            $str .= '<a href="#">';
-            $str .= number_format($temp, 1);
-            $str .= '</a></li>';
-            echo $str;
+          for ($temperature = 10.0; $temperature <= 20.0; $temperature += 0.5) {
+            printf(
+              "<li><a href=\"#t-%.1f\" class=\"btn-input\">%.1f</a></li>",
+              $temperature,
+              $temperature
+            );
           }
         ?>
       </ul>
@@ -44,10 +49,10 @@
 
 <script>
   $(document).ready(function() {
-    $(".btn-power").click(function() {
+    $(".btn-input").click(function() {
       var url = "updatedb.php";
-      var action = $(this).attr("href");
-      var data = { "action": action };
+      var message = $(this).attr("href");
+      var data = { "message": message };
       var fnReload = function() { location.reload(); };
 
       $.post(url, data, fnReload);
