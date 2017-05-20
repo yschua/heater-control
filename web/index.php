@@ -29,12 +29,9 @@
 
       <ul class="dropdown-menu">
         <?php
-          for ($temperature = 10.0; $temperature <= 20.0; $temperature += 0.5) {
-            printf(
-              "<li><a href=\"#t-%.1f\" class=\"btn-input\">%.1f</a></li>",
-              $temperature,
-              $temperature
-            );
+          for ($temp = 10.0; $temp <= 20.0; $temp += 0.5) {
+            printf("<li><a href=\"#t-%.1f\" class=\"btn-input\">%.1f</a></li>",
+              $temp, $temp);
           }
         ?>
       </ul>

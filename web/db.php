@@ -4,7 +4,9 @@
   $row = $stmt->fetchObject();
 
   function GetUpdateSql($field, $val) {
-    return sprintf("UPDATE heater SET %s = %d WHERE heater_id = 1", $field, $val);
+    $query = sprintf("UPDATE heater SET %s = %.1f WHERE heater_id = 1", $field, $val);
+    error_log($query);
+    return $query;
   }
 
   function GetCurrentPower() {
