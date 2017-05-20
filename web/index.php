@@ -13,25 +13,29 @@
   ?>
 
   <h5>
-    Heater is
+    Heater
     <div class="btn-group">
-      <a href="#p-1" class="btn btn-primary btn-input">ON</a>
-      <a href="#p-0" class="btn btn-default btn-input">OFF</a>
+      <a href="#p-1" class="btn btn-input btn-<?php echo GetSelectedPower() ? "primary" : "default";?>">ON</a>
+      <a href="#p-0" class="btn btn-input btn-<?php echo !GetSelectedPower() ? "primary" : "default";?>">OFF</a>
     </div>
   </h5>
 
   <h5>
     <div class="dropdown">
-      Thermostat set at
+      Thermostat
       <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-        <?php $tempCurr = 12.5; echo $tempCurr; ?> &deg;C <span class="caret"></span>
+        <?php echo GetSelectedTemperature();?> &deg;C <span class="caret"></span>
       </button>
 
       <ul class="dropdown-menu">
         <?php
           for ($temp = 10.0; $temp <= 20.0; $temp += 0.5) {
-            printf("<li><a href=\"#t-%.1f\" class=\"btn-input\">%.1f</a></li>",
-              $temp, $temp);
+            printf(
+              "<li><a href=\"#t-%.1f\" class=\"btn-input%s\">%.1f</a></li>",
+              $temp,
+              (GetSelectedTemperature() == $temp) ? " btn-default" : "",
+              $temp
+            );
           }
         ?>
       </ul>

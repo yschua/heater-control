@@ -10,11 +10,11 @@
 
     if ($operation == "p") {
       if ($value == 0 || $value == 1) {
-        SetCurrentPower($value);
+        SetSelectedPower($value);
       }
     } else if ($operation == "t") {
       if ($value >= 10 && $value <= 20) {
-        SetCurrentTemperature($value);
+        SetSelectedTemperature($value);
       }
     }
   }
