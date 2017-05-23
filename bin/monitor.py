@@ -57,7 +57,7 @@ def main():
       c.execute('SELECT * FROM heater WHERE heater_id = 1')
       row = c.fetchone()
 
-      if row['power'] == 1 and row['active_power'] == 0: # switched on
+      if row['selected_power'] == 1 and row['current_power'] == 0: # switched on
         update_power(row)
         update_temperature(row)
       else:
@@ -69,26 +69,26 @@ def main():
   ser.close()
 
 def update_power(row):
-  power, active_power = row['power'], row['active_power']
-  if (power != active_power):
+  selected_power, current_power = row['selected_power'], row['current_power']
+  if (selected_power != current_power):
     send_success = send(POWER)
 
     if send_success:
-      c.execute('UPDATE heater SET active_power = ?', (power, ))
+      c.execute('UPDATE heater SET current_power = ?', (selected_power, ))
     else:
-      c.execute('UPDATE heater SET power = ?', (active_power, ))
+      c.execute('UPDATE heater SET selected_power = ?', (current_power, ))
     conn.commit()
 
     logging.info(
-      'set active_power {} -> {}: {}'.
-      format(active_power, power, 'success' if send_success else 'failed'))
+      'set current_power {} -> {}: {}'.
+      format(current_power, selected_power, 'success' if send_success else 'failed'))
     if not send_success:
-      logging.info('set power back to {}'.format(active_power))
+      logging.info('set selected_power back to {}'.format(current_power))
 
 def update_temperature(row):
-  temp, active_temp = row['temperature'], row['active_temperature']
-  if temp != active_temp:
-    delta = temp - active_temp
+  selected_temperature, current_temperature = row['selected_temperature'], row['current_temperature']
+  if selected_temperature != current_temperature:
+    delta = selected_temperature - current_temperature
     message = TEMP_UP if delta > 0 else TEMP_DOWN
     count = abs(int(delta * 2))
     message = message | count << 2
@@ -96,16 +96,16 @@ def update_temperature(row):
     send_success = send(message)
 
     if send_success:
-      c.execute('UPDATE heater SET active_temperature = ?', (temp, ))
+      c.execute('UPDATE heater SET current_temperature = ?', (selected_temperature, ))
     else:
-      c.execute('UPDATE heater SET temperature = ?', (active_temp, ))
+      c.execute('UPDATE heater SET selected_temperature = ?', (current_temperature, ))
     conn.commit()
 
     logging.info(
-      'set active_temperature {} -> {}: {}'.
-      format(active_temp, temp, 'success' if send_success else 'failed'))
+      'set current_temperature {} -> {}: {}'.
+      format(current_temperature, selected_temperature, 'success' if send_success else 'failed'))
     if not send_success:
-      logging.info('set temperature back to {}'.format(active_temp))
+      logging.info('set selected_temperature back to {}'.format(current_temperature))
 
 def send(message):
   if not isinstance(message, int):
