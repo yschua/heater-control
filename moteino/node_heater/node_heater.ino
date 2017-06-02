@@ -2,11 +2,14 @@
 #include <RFM69_ATC.h>
 #include "LowPower.h"
 
+#define DEBUG
+#include "DebugUtils.h"
+
 // Device
 //#define FREQUENCY   RF69_868MHZ
 #define FREQUENCY     RF69_915MHZ
 #define ENCRYPT_KEY    "0123456789abcdef" // 16 bytes
-#define IS_RFM69HW    
+#define IS_RFM69HW
 #define ENABLE_ATC    // Auto Transmission Control
 
 // Pins
@@ -65,7 +68,7 @@ void loop()
   radio.sendWithRetry(GATEWAY_ID, buff, 1);
   radio.receiveDone();
 
-  Serial.println("send REQ");
+  DEBUG_PRINT("send REQ\n")
 
   delay(40); // round trip delay
 
@@ -74,7 +77,7 @@ void loop()
       radio.sendACK();
     radio.sleep();
 
-    Serial.print("receive: "); Serial.println(radio.DATA[0], HEX);
+    DEBUG_PRINT("receive: %x\n", radio.DATA[0]);
 
     char recv = radio.DATA[0];
     char action = recv & 0x3;
@@ -96,16 +99,18 @@ void loop()
         break;
     }
 
-    Serial.println("send DONE");
+    DEBUG_PRINT("send DONE\n")
     buff[0] = DONE;
     radio.sendWithRetry(GATEWAY_ID, buff, 1);
 
     radio.receiveDone();
     delay(100);
-    Serial.println("listening");
+
+    DEBUG_PRINT("listening\n")
   }
 
-  Serial.println("no response, going back to sleep");
+  DEBUG("no response, going back to sleep\n");
+
   radio.sleep();
   delay(40);
   for (int i = 0; i < 4; i++)
@@ -167,7 +172,7 @@ void blink(byte pin, int duration)
   digitalWrite(pin, LOW);
 }
 
-void press(byte button, int duration) 
+void press(byte button, int duration)
 {
   pinMode(button, OUTPUT);
   pinMode(LED, OUTPUT);
@@ -179,12 +184,12 @@ void press(byte button, int duration)
   delay(200);
 }
 
-void power() 
+void power()
 {
   press(BTN_POW, 1500);
 }
 
-void volume(byte button, int count) 
+void volume(byte button, int count)
 {
   press(button, 400);
 
@@ -192,12 +197,12 @@ void volume(byte button, int count)
     press(button, 400);
 }
 
-void volumeUp(int count) 
+void volumeUp(int count)
 {
   volume(BTN_UP, count);
 }
 
-void volumeDown(int count) 
+void volumeDown(int count)
 {
   volume(BTN_DOWN, count);
 }
