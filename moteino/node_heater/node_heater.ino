@@ -68,7 +68,7 @@ void loop()
   radio.sendWithRetry(GATEWAY_ID, buff, 1);
   radio.receiveDone();
 
-  DEBUG_PRINT("send REQ\n")
+  DEBUG_PRINT("send REQ\n");
 
   delay(40); // round trip delay
 
@@ -99,17 +99,17 @@ void loop()
         break;
     }
 
-    DEBUG_PRINT("send DONE\n")
+    DEBUG_PRINT("send DONE\n");
     buff[0] = DONE;
     radio.sendWithRetry(GATEWAY_ID, buff, 1);
 
     radio.receiveDone();
     delay(100);
 
-    DEBUG_PRINT("listening\n")
+    DEBUG_PRINT("listening\n");
   }
 
-  DEBUG("no response, going back to sleep\n");
+  DEBUG_PRINT("no response, going back to sleep\n");
 
   radio.sleep();
   delay(40);
