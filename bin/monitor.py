@@ -34,7 +34,8 @@ def init():
     level=logging.DEBUG,
     format='[%(asctime)s] %(message)s')
 
-  #db
+  # database
+  # TODO add logging
   global db
   db = homedb.HomeDb(DB_PATH)
 
