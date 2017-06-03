@@ -1,10 +1,10 @@
 import serial
 import time
-import sqlite3
 import logging
 import struct
 import homedb
 
+# TODO auto check OS?
 OS = 'Windows'
 
 if OS == 'Unix':
@@ -34,12 +34,6 @@ def init():
     level=logging.DEBUG,
     format='[%(asctime)s] %(message)s')
 
-  # sqlite
-  global conn, c
-  conn = sqlite3.connect(DB_PATH)
-  conn.row_factory = sqlite3.Row
-  c = conn.cursor()
-
   #db
   global db
   db = homedb.HomeDb(DB_PATH)
@@ -53,7 +47,7 @@ def init():
 def main():
   init()
 
-  # implement safe exit
+  # TODO implement safe exit
   while True:
     print('listening')
     recv = to_uchar(ser.read())
@@ -125,9 +119,6 @@ def to_uchar(byte_data):
   if not byte_data or not isinstance(byte_data, bytes):
     return 0
   return struct.unpack('B', byte_data)[0]
-
-def dict_from_row(row):
-  return dict(zip(row.keys(), row))
 
 if __name__ == '__main__':
   main()
