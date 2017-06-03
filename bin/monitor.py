@@ -3,6 +3,7 @@ import time
 import sqlite3
 import logging
 import struct
+import homedb
 
 OS = 'Windows'
 
@@ -39,6 +40,10 @@ def init():
   conn.row_factory = sqlite3.Row
   c = conn.cursor()
 
+  #db
+  global db
+  db = homedb.HomeDb(DB_PATH)
+
   # serial comm with moteino
   global ser
   ser = serial.Serial(PORT, SERIAL_BAUD, timeout=READ_TIMEOUT)
@@ -54,30 +59,27 @@ def main():
     recv = to_uchar(ser.read())
     if (recv == REQ):
       print('receive REQ')
-      c.execute('SELECT * FROM heater WHERE heater_id = 1')
-      row = c.fetchone()
 
-      if row['selected_power'] == 1 and row['current_power'] == 0: # switched on
-        update_power(row)
-        update_temperature(row)
+      if db.get_selected_power() == 1 and db.get_current_power() == 0: # switched on
+        update_power()
+        update_temperature()
       else:
-        update_temperature(row)
-        update_power(row)
+        update_temperature()
+        update_power()
     else:
       print('nothing received')
 
   ser.close()
 
-def update_power(row):
-  selected_power, current_power = row['selected_power'], row['current_power']
+def update_power():
+  selected_power, current_power = db.get_selected_power(), db.get_current_power()
   if (selected_power != current_power):
     send_success = send(POWER)
 
     if send_success:
-      c.execute('UPDATE heater SET current_power = ?', (selected_power, ))
+      db.set_current_power(selected_power)
     else:
-      c.execute('UPDATE heater SET selected_power = ?', (current_power, ))
-    conn.commit()
+      db.set_selected_power(current_power)
 
     logging.info(
       'set current_power {} -> {}: {}'.
@@ -85,10 +87,10 @@ def update_power(row):
     if not send_success:
       logging.info('set selected_power back to {}'.format(current_power))
 
-def update_temperature(row):
-  selected_temperature, current_temperature = row['selected_temperature'], row['current_temperature']
-  if selected_temperature != current_temperature:
-    delta = selected_temperature - current_temperature
+def update_temperature():
+  selected_temp, current_temp = db.get_selected_temp(), db.get_current_temp()
+  if selected_temp != current_temp:
+    delta = selected_temp - current_temp
     message = TEMP_UP if delta > 0 else TEMP_DOWN
     count = abs(int(delta * 2))
     message = message | count << 2
@@ -96,16 +98,15 @@ def update_temperature(row):
     send_success = send(message)
 
     if send_success:
-      c.execute('UPDATE heater SET current_temperature = ?', (selected_temperature, ))
+      db.set_current_temp(selected_temp)
     else:
-      c.execute('UPDATE heater SET selected_temperature = ?', (current_temperature, ))
-    conn.commit()
+      db.set_selected_temp(current_temp)
 
     logging.info(
       'set current_temperature {} -> {}: {}'.
-      format(current_temperature, selected_temperature, 'success' if send_success else 'failed'))
+      format(current_temp, selected_temp, 'success' if send_success else 'failed'))
     if not send_success:
-      logging.info('set selected_temperature back to {}'.format(current_temperature))
+      logging.info('set selected_temp back to {}'.format(current_temp))
 
 def send(message):
   if not isinstance(message, int):
