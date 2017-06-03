@@ -10,14 +10,14 @@
 #define FREQUENCY     RF69_915MHZ
 #define ENCRYPT_KEY   "0123456789abcdef" // 16 bytes
 #define IS_RFM69HW
-#define ENABLE_ATC    // Auto Transmission Control
+#define ENABLE_ATC // Auto Transmission Control
 
 // Pins
 #define LED           9
 #define BTN_UP        16
 #define BTN_DOWN      14
 #define BTN_POW       15
-#define INT_RADIO     2
+#define INT_RADIO     2 // interrupt
 
 // Network
 #define NODE_ID       2    // Unique

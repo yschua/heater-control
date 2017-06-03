@@ -35,7 +35,6 @@ def init():
     format='[%(asctime)s] %(message)s')
 
   # database
-  # TODO add logging
   global db
   db = homedb.HomeDb(DB_PATH, logging)
 
