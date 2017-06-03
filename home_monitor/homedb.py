@@ -2,10 +2,11 @@ import sqlite3
 
 class HomeDb:
 
-  def __init__(self, path):
+  def __init__(self, path, logging):
     self._conn = sqlite3.connect(path)
     self._conn.row_factory = sqlite3.Row
     self._cursor = self._conn.cursor()
+    self._logging = logging
 
   def _get_field(self, field):
     sql = 'SELECT {} FROM heater WHERE heater_id = 1'.format(field)
@@ -28,8 +29,8 @@ class HomeDb:
     if self._get_field(field) == value:
       return
 
-    sql = 'UPDATE heater SET {} = {}'.format(field, value)
-    print(sql)
+    sql = 'UPDATE heater SET {} = {} WHERE heater_id = 1'.format(field, value)
+    self._logging.info(sql)
     self._cursor.execute(sql)
     self._conn.commit()
 

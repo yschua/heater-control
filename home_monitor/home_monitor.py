@@ -31,13 +31,13 @@ SERIAL_BAUD = 115200
 def init():
   logging.basicConfig(
     filename=LOG_PATH,
-    level=logging.DEBUG,
+    level=logging.DEBUG, # TODO set this with command line argument
     format='[%(asctime)s] %(message)s')
 
   # database
   # TODO add logging
   global db
-  db = homedb.HomeDb(DB_PATH)
+  db = homedb.HomeDb(DB_PATH, logging)
 
   # serial comm with moteino
   global ser
@@ -50,10 +50,10 @@ def main():
 
   # TODO implement safe exit
   while True:
-    print('listening')
+    logging.debug('listening')
     recv = to_uchar(ser.read())
     if (recv == REQ):
-      print('receive REQ')
+      logging.debug('receive REQ')
 
       if db.get_selected_power() == 1 and db.get_current_power() == 0: # switched on
         update_power()
@@ -62,7 +62,7 @@ def main():
         update_temperature()
         update_power()
     else:
-      print('nothing received')
+      logging.debug('nothing received')
 
   ser.close()
 
@@ -106,13 +106,13 @@ def update_temperature():
 def send(message):
   if not isinstance(message, int):
     raise ValueError()
-  print('send MSG: {:02x}'.format(message))
+  logging.debug('send MSG: {:02x}'.format(message))
   ser.write(bytes([message]))
   recv = to_uchar(ser.read())
   if recv == DONE:
-    print('receive DONE')
+    logging.debug('receive DONE')
   else:
-    print('no reply, rollback')
+    logging.debug('no reply, rollback')
   return recv == DONE
   # return to_uchar(ser.read()) == DONE # True if ack received
 
