@@ -1,8 +1,8 @@
 import serial
 import time
 import logging
-import struct
 import homedb
+from message import Message
 
 # TODO auto check OS?
 OS = 'Windows'
@@ -16,109 +16,83 @@ elif OS == 'Windows':
   DB_PATH = '../db/home.db'
   LOG_PATH = 'monitor.log'
 
-# Communications
-REQ = 0x1
-DONE = 0x2
-MSG = 0x3
-TEMP_UP = 0x1
-TEMP_DOWN = 0x2
-POWER = 0x3
+# receive message control values
+SUCCESS = 0x0
+FAILED = 0x1
+REQUEST = 0x2
 
-READ_TIMEOUT = 15 # depends on time from MIN_TEMP to MAX_TEMP and vice-versa
-POLL_PERIOD = 6 # depends on time it takes for temperature control to "settle"
+# parameters
+READ_TIMEOUT = 15 # TODO check behaviour on read timeout
 SERIAL_BAUD = 115200
 
-def init():
+def main():
   logging.basicConfig(
     filename=LOG_PATH,
     level=logging.DEBUG, # TODO set this with command line argument
     format='[%(asctime)s] %(message)s')
 
-  # database
-  global db
+  # sqlite3 database
   db = homedb.HomeDb(DB_PATH, logging)
 
-  # serial comm with moteino
-  global ser
+  # serial communications with gateway
   ser = serial.Serial(PORT, SERIAL_BAUD, timeout=READ_TIMEOUT)
 
-  logging.info('monitor.py started')
+  logging.info('home_monitor.py started')
 
-def main():
-  init()
-
-  # TODO implement safe exit
   while True:
-    logging.debug('listening')
-    recv = to_uchar(ser.read())
-    if (recv == REQ):
-      logging.debug('receive REQ')
+    if receive(ser).get() == REQUEST:
+      logging.info('receive update request')
+      msg_send = get_message(db)
+      if msg_send.get() != 0x0:
+        send(ser, msg_send)
 
-      if db.get_selected_power() == 1 and db.get_current_power() == 0: # switched on
-        update_power()
-        update_temperature()
+        if receive(ser).get() == SUCCESS:
+          logging.info('update successful')
+          update_current(db)
+        else:
+          logging.info('update failed')
       else:
-        update_temperature()
-        update_power()
-    else:
-      logging.debug('nothing received')
+        logging.info('nothing to update')
 
   ser.close()
 
-def update_power():
-  selected_power, current_power = db.get_selected_power(), db.get_current_power()
-  if (selected_power != current_power):
-    send_success = send(POWER)
+def get_message(db):
+  msg = Message()
+  selected_power = db.get_selected_power()
+  current_power = db.get_current_power()
+  selected_temp = db.get_selected_temp()
+  current_temp = db.get_current_temp()
 
-    if send_success:
-      db.set_current_power(selected_power)
-    else:
-      db.set_selected_power(current_power)
+  if selected_power != current_power:
+    msg.power_toggle()
 
-    logging.info(
-      'set current_power {} -> {}: {}'.
-      format(current_power, selected_power, 'success' if send_success else 'failed'))
-    if not send_success:
-      logging.info('set selected_power back to {}'.format(current_power))
+    # ignore temperature change on power off
+    if selected_power == 0:
+      return msg
 
-def update_temperature():
-  selected_temp, current_temp = db.get_selected_temp(), db.get_current_temp()
   if selected_temp != current_temp:
     delta = selected_temp - current_temp
-    message = TEMP_UP if delta > 0 else TEMP_DOWN
-    count = abs(int(delta * 2))
-    message = message | count << 2
+    msg.temp_delta(delta * 2)
 
-    send_success = send(message)
+  return msg
 
-    if send_success:
-      db.set_current_temp(selected_temp)
-    else:
-      db.set_selected_temp(current_temp)
+def update_current(db):
+  selected_power = db.get_selected_power()
+  current_power = db.get_current_power()
 
-    logging.info(
-      'set current_temperature {} -> {}: {}'.
-      format(current_temp, selected_temp, 'success' if send_success else 'failed'))
-    if not send_success:
-      logging.info('set selected_temp back to {}'.format(current_temp))
+  # do not update temperature on power off
+  if not (selected_power == 0 and current_power == 1):
+    db.set_current_temp(db.get_selected_temp())
+  db.set_current_power(selected_power)
 
-def send(message):
-  if not isinstance(message, int):
-    raise ValueError()
-  logging.debug('send MSG: {:02x}'.format(message))
-  ser.write(bytes([message]))
-  recv = to_uchar(ser.read())
-  if recv == DONE:
-    logging.debug('receive DONE')
-  else:
-    logging.debug('no reply, rollback')
-  return recv == DONE
-  # return to_uchar(ser.read()) == DONE # True if ack received
+def send(ser, msg):
+  logging.info('tx: {}'.format(msg.get_str()))
+  ser.write(msg.get_bytes())
 
-def to_uchar(byte_data):
-  if not byte_data or not isinstance(byte_data, bytes):
-    return 0
-  return struct.unpack('B', byte_data)[0]
+def receive(ser):
+  msg = Message.create_from_bytes(ser.read())
+  logging.info('rx: {}'.format(msg.get_str()))
+  return msg
 
 if __name__ == '__main__':
   main()

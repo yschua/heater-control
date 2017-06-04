@@ -10,6 +10,7 @@ class HomeDb:
 
   def _get_field(self, field):
     sql = 'SELECT {} FROM heater WHERE heater_id = 1'.format(field)
+    #self._logging.info(sql)
     self._cursor.execute(sql)
     return self._cursor.fetchone()[0]
 
