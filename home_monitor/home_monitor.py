@@ -39,6 +39,7 @@ def main():
 
   logging.info('home_monitor.py started')
 
+  # TODO implement safe exit
   while True:
     if receive(ser).get() == REQUEST:
       logging.info('receive update request')
