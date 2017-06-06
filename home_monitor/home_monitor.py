@@ -22,7 +22,6 @@ FAILED = 0x1
 REQUEST = 0x2
 
 # parameters
-READ_TIMEOUT = 15 # TODO check behaviour on read timeout
 SERIAL_BAUD = 115200
 
 def main():
@@ -35,25 +34,32 @@ def main():
   db = homedb.HomeDb(DB_PATH, logging)
 
   # serial communications with gateway
-  ser = serial.Serial(PORT, SERIAL_BAUD, timeout=READ_TIMEOUT)
+  ser = serial.Serial(PORT, SERIAL_BAUD)
 
   logging.info('home_monitor.py started')
 
   # TODO implement safe exit
   while True:
-    if receive(ser).get() == REQUEST:
-      logging.info('receive update request')
-      msg_send = get_message(db)
-      if msg_send.get() != 0x0:
-        send(ser, msg_send)
+    msg_recv = receive(ser) # blocking until received
 
-        if receive(ser).get() == SUCCESS:
-          logging.info('update successful')
-          update_current(db)
-        else:
-          logging.info('update failed')
-      else:
-        logging.info('nothing to update')
+    if not msg_recv or msg_recv.get() != REQUEST:
+      continue
+
+    logging.info('receive update request')
+
+    msg_send = get_message(db)
+
+    # nothing to update
+    if msg_send.get() == 0x0:
+      continue
+
+    send(ser, msg_send)
+    msg_recv = receive(ser, 1) # will have to play around with this timeout
+
+    if msg_recv and msg_recv.get() == SUCCESS:
+      update_current(db)
+    else:
+      logging.error('update failed')
 
   ser.close()
 
@@ -90,8 +96,15 @@ def send(ser, msg):
   logging.info('tx: {}'.format(msg.get_str()))
   ser.write(msg.get_bytes())
 
-def receive(ser):
-  msg = Message.create_from_bytes(ser.read())
+def receive(ser, timeout = None):
+  ser.timeout = timeout
+  bytes_data = ser.read()
+
+  # return null on timeout
+  if not bytes_data:
+    return None
+
+  msg = Message.create_from_bytes(bytes_data)
   logging.info('rx: {}'.format(msg.get_str()))
   return msg
 
