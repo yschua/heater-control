@@ -25,23 +25,15 @@
 #define GATEWAY_ID    1
 #define SERIAL_BAUD   115200
 
-// Communications Protocol
-// Header (1,2 LSB)
-#define REQ           0x1
-#define DONE          0x2
-#define MSG           0x3
-// Payload (3,4 LSB)
-#define TEMP_UP       0x1
-#define TEMP_DOWN     0x2
-#define POWER         0x3
-
-// Global
+// Globals
 #ifdef ENABLE_ATC
   RFM69_ATC radio;
 #else
   RFM69 radio;
 #endif
-char buff[1];
+
+const char REQUEST = 0x2;
+const unsigned long TIMEOUT = 40; // ms
 
 void setup()
 {
@@ -63,63 +55,60 @@ void setup()
   delay(1000);
 }
 
-void loop()
+bool request()
 {
-  buff[0] = REQ;
-  radio.sendWithRetry(GATEWAY_ID, buff, 1);
-  radio.receiveDone();
+  DEBUG_PRINT("tx REQUEST\n");
 
-  DEBUG_PRINT("send REQ\n");
+  char msg[1] = {REQUEST};
+  bool ack = radio.sendWithRetry(GATEWAY_ID, msg, 1);
 
-  delay(40); // round trip delay
-
-  while (radio.receiveDone()) {
-    if (radio.ACKRequested()) {
-      radio.sendACK();
-    }
-
-    radio.sleep();
-
-    DEBUG_PRINT("receive: %x\n", radio.DATA[0]);
-
-    char recv = radio.DATA[0];
-    char action = recv & 0x3;
-    char count = recv >> 2;
-
-    switch (action) {
-      case TEMP_UP:
-        delay(1000);
-        tempUp(count);
-        break;
-      case TEMP_DOWN:
-        delay(1000);
-        tempDown(count);
-        break;
-      case POWER:
-        power();
-        break;
-      default:
-        break;
-    }
-
-    DEBUG_PRINT("send DONE\n");
-
-    buff[0] = DONE;
-    radio.sendWithRetry(GATEWAY_ID, buff, 1);
-
-    radio.receiveDone();
-    delay(100);
-
-    DEBUG_PRINT("listening\n");
+  if (!ack) {
+    DEBUG_PRINT("REQUEST failed\n");
+    return false;
   }
 
-  DEBUG_PRINT("no response, going back to sleep\n");
+  return true;
+}
 
-  radio.sleep();
-  delay(40);
+void updateHeater(char msg)
+{
+}
 
-  for (int i = 0; i < 4; i++) {
-    LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+void loop()
+{
+  static bool listen = false;
+  static unsigned long requestTime = 0;
+
+  if (listen) {
+    if (radio.receiveDone()) {
+      radio.sendACK();
+      radio.sleep();
+
+      DEBUG_PRINT("rx: %#x after %u ms\n", radio.DATA[0], millis() - requestTime);
+
+      // updateHeater(radio.DATA[0]);
+
+      listen = false;
+    } else {
+      unsigned long elapsedTime = millis() - requestTime;
+      if (elapsedTime > TIMEOUT)
+      {
+        listen = false;
+        DEBUG_PRINT("rx timeout\n");
+      }
+    }
+  } else {
+    radio.sleep();
+
+    Serial.flush();
+    //for (int i = 0; i < 4; ++i) {
+      LowPower.powerDown(SLEEP_4S, ADC_OFF, BOD_OFF);
+    //}
+
+    if (request()) {
+      listen = true;
+      requestTime = millis();
+    }
   }
 }
 

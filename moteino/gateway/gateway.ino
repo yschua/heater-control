@@ -24,7 +24,9 @@
   RFM69 radio;
 #endif
 
-char buff[1];
+// Message control
+const char SUCCESS = 0x0;
+const char FAILED = 0x1;
 
 void setup()
 {
@@ -44,14 +46,13 @@ void setup()
 void loop()
 {
   if (Serial.available() > 0) {
-    buff[0] = Serial.read();
-    radio.sendWithRetry(HEATER_ID, buff, 1); // TODO needs to notify serial on fail
+    char msg[1] = {Serial.read()};
+    bool ack = radio.sendWithRetry(HEATER_ID, msg, 1);
+    Serial.write(ack ? SUCCESS : FAILED);
   }
 
   if (radio.receiveDone()) {
-    if (radio.ACKRequested()) {
-      radio.sendACK();
-    }
+    radio.sendACK();
     Serial.write(radio.DATA[0]);
   }
 }
