@@ -72,6 +72,21 @@ bool request()
 
 void updateHeater(char msg)
 {
+  bool powerToggle = ((msg & 0x1) == 0x1);
+  int delta = (msg >> 1) & 0x3f;
+  if ((msg & 0x80) != 0x0) {
+    delta *= -1;
+  }
+
+  if (powerToggle) {
+    power();
+  }
+
+  if (delta > 0) {
+    tempUp(delta);
+  } else if (delta < 0) {
+    tempDown(abs(delta));
+  }
 }
 
 void loop()
@@ -86,7 +101,7 @@ void loop()
 
       DEBUG_PRINT("rx: %#x after %u ms\n", radio.DATA[0], millis() - requestTime);
 
-      // updateHeater(radio.DATA[0]);
+      updateHeater(radio.DATA[0]);
 
       listen = false;
     } else {
@@ -101,9 +116,9 @@ void loop()
     radio.sleep();
 
     Serial.flush();
-    //for (int i = 0; i < 4; ++i) {
-      LowPower.powerDown(SLEEP_4S, ADC_OFF, BOD_OFF);
-    //}
+    for (int i = 0; i < 2; ++i) {
+      LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+    }
 
     if (request()) {
       listen = true;
@@ -132,6 +147,7 @@ void blink(byte pin, int duration)
 
 void press(byte button, int duration)
 {
+  DEBUG_PRINT("press %d\n", button);
   pinMode(button, OUTPUT);
   pinMode(LED, OUTPUT);
   digitalWrite(button, HIGH);
@@ -144,22 +160,25 @@ void press(byte button, int duration)
 
 void power()
 {
+  DEBUG_PRINT("switch power\n");
   press(BTN_POW, 1500);
 }
 
-void temp(byte button, int count)
+void changeTemp(byte button, int count)
 {
-  for (int i = 0; i < count + 1; i++) {
+  for (int i = 0; i < count + 1; i++) { // extra initial press to change temp
     press(button, 400);
   }
 }
 
 void tempUp(int count)
 {
-  temp(BTN_UP, count);
+  DEBUG_PRINT("temp up %d\n", count);
+  changeTemp(BTN_UP, count);
 }
 
 void tempDown(int count)
 {
-  temp(BTN_DOWN, count);
+  DEBUG_PRINT("temp down %d\n", count);
+  changeTemp(BTN_DOWN, count);
 }
