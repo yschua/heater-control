@@ -2,7 +2,7 @@
 #include <RFM69_ATC.h>
 #include "LowPower.h"
 
-#define DEBUG
+//#define DEBUG
 #include "DebugUtils.h"
 
 // Device
@@ -61,6 +61,7 @@ bool request()
 
   char msg[1] = {REQUEST};
   bool ack = radio.sendWithRetry(GATEWAY_ID, msg, 1);
+  radio.sleep();
 
   if (!ack) {
     DEBUG_PRINT("REQUEST failed\n");
@@ -113,10 +114,13 @@ void loop()
       }
     }
   } else {
-    radio.sleep();
+    radio.sleep(); // very important, reduces idle current draw from 16 mA to 0.2~0.3 mA
 
+#ifdef DEBUG
     Serial.flush();
-    for (int i = 0; i < 2; ++i) {
+#endif
+
+    for (int i = 0; i < 8; ++i) {
       LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
     }
 
