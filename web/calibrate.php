@@ -1,34 +1,57 @@
 <?php
-  include "header.php"
+  require "header.php";
+  require "db.php";
 ?>
 
-<div class="container" role="main">
+<div class="container">
 
-  <div class="col-xs-7 display">
-    <div id="temperature">10.0&deg;</div>
-    <div id="power">ON</div>
-  </div>
-
-  <div class="col-xs-5">
-    <div class="btn-group-vertical">
-      <button type="button" class="btn btn-default btn-xl " value="increase">
-        <span class="glyphicon glyphicon-triangle-top"></span>
-      </button>
-      <button type="button" class="btn btn-default btn-xl " value="decrease">
-        <span class="glyphicon glyphicon-triangle-bottom"></span>
-      </button>
-      <button type="button" class="btn btn-default btn-xl " value="power">
-        <span class="glyphicon glyphicon-off"></span>
-      </button>
-      <button type="button" class="btn btn-primary btn-calibrate" value="calibrate">
-        Calibrate
-      </button>
+  <h5>
+    Heater
+    <div class="btn-group">
+      <a href="#P-1" class="btn btn-input btn-<?php echo GetSelectedPower() ? "primary" : "default";?>">ON</a>
+      <a href="#P-0" class="btn btn-input btn-<?php echo !GetSelectedPower() ? "primary" : "default";?>">OFF</a>
     </div>
-  </div>
+  </h5>
 
-  
+  <h5>
+    <div class="dropdown">
+      Thermostat
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+        <?php echo GetSelectedTemperature();?> &deg;C <span class="caret"></span>
+      </button>
+
+      <ul class="dropdown-menu">
+        <?php
+          for ($temp = 10.0; $temp <= 20.0; $temp += 0.5) {
+            printf(
+              "<li><a href=\"#T-%.1f\" class=\"btn-input%s\">%.1f</a></li>",
+              $temp,
+              (GetSelectedTemperature() == $temp) ? " btn-default" : "",
+              $temp
+            );
+          }
+        ?>
+      </ul>
+    </div>
+  </h5>
+
 </div> <!-- /container -->
 
 <?php
-  include "footer.php"
+  require "footer.php";
 ?>
+
+<script>
+  $(document).ready(function() {
+    $(".btn-input").click(function() {
+      var url = "updatedb.php";
+      var message = $(this).attr("href");
+      var data = { "message": message };
+      var fnReload = function() { location.reload(); };
+
+      $.post(url, data, fnReload);
+    });
+  });
+
+  // TODO reload on page active
+</script>

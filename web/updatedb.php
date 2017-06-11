@@ -8,13 +8,19 @@
     $operation = $message[0];
     $value = doubleval($message[1]);
 
-    if ($operation == "p") {
+    if (strtolower($operation) == "p") {
       if ($value == 0 || $value == 1) {
         SetSelectedPower($value);
+        if ($operation == "P") {
+          SetCurrentPower($value);
+        }
       }
-    } else if ($operation == "t") {
+    } else if (strtolower($operation) == "t") {
       if ($value >= 10 && $value <= 20) {
         SetSelectedTemperature($value);
+        if ($operation == "T") {
+          SetCurrentTemperature($value);
+        }
       }
     }
   }
