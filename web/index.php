@@ -31,13 +31,30 @@
         <?php
           for ($temp = 10.0; $temp <= 20.0; $temp += 0.5) {
             printf(
-              "<li><a href=\"#t-%.1f\" class=\"btn-input%s\">%.1f</a></li>",
+              "<li><a href=\"#t-%.1f\" class=\"btn-input%s\">%.1f</a></li>\n",
               $temp,
               (GetSelectedTemperature() == $temp) ? " btn-default" : "",
               $temp
             );
           }
         ?>
+      </ul>
+    </div>
+  </h5>
+
+  <h5>
+    <div class="dropdown">
+      Timeout
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" <?php if (!GetSelectedPower()) { echo "disabled"; }?>>
+        <?php echo GetTimeoutStr(); ?> <span class="caret"></span>
+      </button>
+
+      <ul class="dropdown-menu">
+        <li><a href="#o-0" class="btn-input">OFF</a></li>
+        <li><a href="#o-30" class="btn-input">30 min</a></li>
+        <li><a href="#o-60" class="btn-input">60 min</a></li>
+        <li><a href="#o-120" class="btn-input">120 min</a></li>
+        <li><a href="#o-180" class="btn-input">180 min</a></li>
       </ul>
     </div>
   </h5>

@@ -4,7 +4,7 @@
   $row = $stmt->fetchObject();
 
   function GetUpdateSql($field, $val) {
-    $query = sprintf("UPDATE heater SET %s = %.1f WHERE heater_id = 1", $field, $val);
+    $query = sprintf("UPDATE heater SET %s = %s WHERE heater_id = 1", $field, $val);
     error_log($query);
     return $query;
   }
@@ -65,5 +65,27 @@
       $stmt = $pdo->prepare(GetUpdateSql("selected_temperature", BoundTemperature($temperature)));
       $stmt->execute();
     }
+  }
+
+  function GetTimeoutStr() {
+    global $row;
+    global $pdo;
+
+    if (is_null($row->timeout)) {
+      return "OFF";
+    }
+
+    $query = sprintf("SELECT strftime('%%H:%%M', '%s')", $row->timeout);
+    $stmt = $pdo->query($query);
+    return $stmt->fetch()[0];
+  }
+
+  function SetTimeout($timeout) {
+    global $pdo;
+    $datetime = ($timeout > 0)
+      ? sprintf("datetime('now', 'localtime', '+%d minutes')", $timeout)
+      : "NULL";
+    $stmt = $pdo->prepare(GetUpdateSql("timeout", $datetime));
+    $stmt->execute();
   }
 ?>

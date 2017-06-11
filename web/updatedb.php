@@ -14,6 +14,9 @@
         if ($operation == "P") {
           SetCurrentPower($value);
         }
+        if ($value == 0) {
+          SetTimeout(0);
+        }
       }
     } else if (strtolower($operation) == "t") {
       if ($value >= 10 && $value <= 20) {
@@ -21,6 +24,10 @@
         if ($operation == "T") {
           SetCurrentTemperature($value);
         }
+      }
+    } else if ($operation == "o") {
+      if ($value >= 0) {
+        SetTimeout($value);
       }
     }
   }
