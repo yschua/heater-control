@@ -44,13 +44,14 @@
 
   <h5>
     <div class="dropdown">
-      Timeout
+      Timeout <?php if (GetTimeoutStr() != "OFF") { echo "at "; } ?>
       <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" <?php if (!GetSelectedPower()) { echo "disabled"; }?>>
         <?php echo GetTimeoutStr(); ?> <span class="caret"></span>
       </button>
 
       <ul class="dropdown-menu">
         <li><a href="#o-0" class="btn-input">OFF</a></li>
+        <li><a href="#o-1" class="btn-input">1 min</a></li>
         <li><a href="#o-30" class="btn-input">30 min</a></li>
         <li><a href="#o-60" class="btn-input">60 min</a></li>
         <li><a href="#o-120" class="btn-input">120 min</a></li>

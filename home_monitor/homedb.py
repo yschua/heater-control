@@ -46,3 +46,17 @@ class HomeDb:
 
   def set_current_temp(self, value):
     self._set_field('current_temperature', value)
+
+  def _get_current_datetime(self):
+    sql = 'SELECT datetime(\'now\', \'localtime\')';
+    self._cursor.execute(sql)
+    return self._cursor.fetchone()[0]
+
+  def check_timeout(self):
+    timeout = self._get_field('timeout')
+    if not timeout:
+      return False
+    return (self._get_current_datetime() > timeout)
+
+  def clear_timeout(self):
+    self._set_field('timeout', 'NULL');

@@ -45,6 +45,9 @@ def main():
     if not msg_recv or msg_recv.get() != REQUEST:
       continue
 
+    # timing is very critical between request receive and request reply
+    # this means no expensive queries like sql updates until message is sent
+
     logging.info('receive update request')
 
     msg_send = get_message(db)
@@ -65,6 +68,12 @@ def main():
 
 def get_message(db):
   msg = Message()
+
+  # turn off on timeout
+  if db.check_timeout():
+    msg.power_toggle()
+    return msg
+
   selected_power = db.get_selected_power()
   current_power = db.get_current_power()
   selected_temp = db.get_selected_temp()
@@ -84,6 +93,10 @@ def get_message(db):
   return msg
 
 def update_current(db):
+  if db.check_timeout():
+    db.clear_timeout()
+    db.set_selected_power(0)
+
   selected_power = db.get_selected_power()
   current_power = db.get_current_power()
 
