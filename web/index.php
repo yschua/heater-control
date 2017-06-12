@@ -51,7 +51,6 @@
 
       <ul class="dropdown-menu">
         <li><a href="#o-0" class="btn-input">OFF</a></li>
-        <li><a href="#o-1" class="btn-input">1 min</a></li>
         <li><a href="#o-30" class="btn-input">30 min</a></li>
         <li><a href="#o-60" class="btn-input">60 min</a></li>
         <li><a href="#o-120" class="btn-input">120 min</a></li>
