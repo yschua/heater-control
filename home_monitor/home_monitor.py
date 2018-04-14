@@ -5,12 +5,12 @@ import homedb
 from message import Message
 
 # TODO auto check OS?
-OS = 'Windows'
+OS = 'Unix'
 
 if OS == 'Unix':
   PORT = '/dev/ttyUSB0'
-  DB_PATH = '/var/db/home.db'
-  LOG_PATH = '/var/scripts/monitor.log'
+  DB_PATH = '../db/home.db'
+  LOG_PATH = 'monitor.log'
 elif OS == 'Windows':
   PORT = 'COM3'
   DB_PATH = '../db/home.db'
