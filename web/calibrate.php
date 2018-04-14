@@ -5,6 +5,13 @@
 
 <div class="container">
 
+  <?php
+    printf("current_power: %d<br>", GetCurrentPower());
+    printf("selected_power: %d<br>", GetSelectedPower());
+    printf("current_temperature: %.1f<br>", GetCurrentTemperature());
+    printf("selected_temperature: %.1f<br>", GetSelectedTemperature());
+  ?>
+
   <h5>
     Heater
     <div class="btn-group">
