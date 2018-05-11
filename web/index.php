@@ -5,18 +5,18 @@
 
 <div class="container">
 
-  <h5>
-    Heater
-    <div class="btn-group">
+  <div class="control-item">
+    <div class="control-label">Power</div>
+    <div class="btn-group control-input">
       <a href="#p-1" class="btn btn-input btn-<?php echo GetSelectedPower() ? "primary" : "default";?>">ON</a>
-      <a href="#p-0" class="btn btn-input btn-<?php echo !GetSelectedPower() ? "primary" : "default";?>">OFF</a>
+      <a href="#p-0" class="btn btn-input btn-<?php echo !GetSelectedPower() ? "danger" : "default";?>">OFF</a>
     </div>
-  </h5>
+  </div>
 
-  <h5>
+  <div class="control-item">
     <div class="dropdown">
-      Thermostat
-      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+      <div class="control-label">Temperature</div>
+      <button class="btn btn-primary dropdown-toggle control-input" type="button" data-toggle="dropdown">
         <?php echo GetSelectedTemperature();?> &deg;C <span class="caret"></span>
       </button>
 
@@ -33,12 +33,12 @@
         ?>
       </ul>
     </div>
-  </h5>
+  </div>
 
-  <h5>
+  <div class="control-item">
     <div class="dropdown">
-      Timeout <?php if (GetTimeoutStr() != "OFF") { echo "at "; } ?>
-      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" <?php if (!GetSelectedPower()) { echo "disabled"; }?>>
+      <div class="control-label">Timeout</div>
+      <button class="btn btn-primary dropdown-toggle control-input" type="button" data-toggle="dropdown" <?php if (!GetSelectedPower()) { echo "disabled"; }?>>
         <?php echo GetTimeoutStr(); ?> <span class="caret"></span>
       </button>
 
@@ -50,7 +50,61 @@
         <li><a href="#o-180" class="btn-input">180 min</a></li>
       </ul>
     </div>
-  </h5>
+  </div>
+
+  <hr>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="col-xs-4">Schedule</th>
+        <th>Start</th>
+        <th>End</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Daily</td>
+        <td>10:00</td>
+        <td>11:20</td>
+        <td><button class="btn btn-danger" type="button">&times;</button></td>
+      </tr>
+      <tr>
+        <td>
+          <select class="form-control">
+            <option>Daily</option>
+            <option>Weekdays</option>
+            <option>Weekend</option>
+            <option>Monday</option>
+            <option>Tuesday</option>
+            <option>Wednesday</option>
+            <option>Thursday</option>
+            <option>Friday</option>
+            <option>Saturday</option>
+            <option>Sunday</option>
+          </select>
+        </td>
+        <td>
+          <div class="input-group clockpicker">
+            <input type="text" class="form-control" value="09:30">
+            <span class="input-group-addon">
+              <span class="glyphicon glyphicon-time"></span>
+            </span>
+          </div>
+        </td>
+        <td>
+          <div class="input-group clockpicker">
+            <input type="text" class="form-control" value="09:30">
+            <span class="input-group-addon">
+              <span class="glyphicon glyphicon-time"></span>
+            </span>
+          </div>
+        </td>
+        <td><button class="btn btn-primary" type="button">&plus;</button></td>
+      </tr>
+    </tbody>
+  </table>
 
 </div>
 
@@ -69,6 +123,11 @@
       $.post(url, data, fnReload);
     });
   });
-
-  // TODO reload on page active
+</script>
+<!-- TODO reload on page active -->
+<script type="text/javascript" src="bootstrap/js/bootstrap-clockpicker.min.js"></script>
+<script type="text/javascript">
+  $(".clockpicker").clockpicker({
+    autoclose: true
+  });
 </script>
