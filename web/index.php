@@ -8,15 +8,15 @@
   <div class="control-item">
     <div class="control-label">Power</div>
     <div class="btn-group control-input">
-      <a href="#p-1" class="btn btn-input btn-<?php echo GetSelectedPower() ? "primary" : "default";?>">ON</a>
-      <a href="#p-0" class="btn btn-input btn-<?php echo !GetSelectedPower() ? "danger" : "default";?>">OFF</a>
+      <a href="#p-1" class="btn btn-lg btn-input col-xs-6 btn-<?php echo GetSelectedPower() ? "primary" : "default";?>">ON</a>
+      <a href="#p-0" class="btn btn-lg btn-input col-xs-6 btn-<?php echo !GetSelectedPower() ? "danger" : "default";?>">OFF</a>
     </div>
   </div>
 
   <div class="control-item">
     <div class="dropdown">
       <div class="control-label">Temperature</div>
-      <button class="btn btn-primary dropdown-toggle control-input" type="button" data-toggle="dropdown">
+      <button class="btn btn-lg btn-primary dropdown-toggle control-input" type="button" data-toggle="dropdown">
         <?php echo GetSelectedTemperature();?> &deg;C <span class="caret"></span>
       </button>
 
@@ -38,7 +38,7 @@
   <div class="control-item">
     <div class="dropdown">
       <div class="control-label">Timeout</div>
-      <button class="btn btn-primary dropdown-toggle control-input" type="button" data-toggle="dropdown" <?php if (!GetSelectedPower()) { echo "disabled"; }?>>
+      <button class="btn btn-lg btn-primary dropdown-toggle control-input" type="button" data-toggle="dropdown" <?php if (!GetSelectedPower()) { echo "disabled"; }?>>
         <?php echo GetTimeoutStr(); ?> <span class="caret"></span>
       </button>
 
@@ -52,12 +52,20 @@
     </div>
   </div>
 
+  <div class="control-item">
+    <div class="control-label">Schedule</div>
+    <div class="btn-group control-input">
+      <a href="#" class="btn btn-lg col-xs-6 btn-input btn-default">ON</a>
+      <a href="#" class="btn btn-lg col-xs-6 btn-input btn-danger">OFF</a>
+    </div>
+  </div>
+
   <hr>
 
-  <table class="table">
+  <table class="table table-schedule">
     <thead>
       <tr>
-        <th class="col-xs-4">Schedule</th>
+        <th class="col-xs-4">Days</th>
         <th>Start</th>
         <th>End</th>
         <th></th>
@@ -68,7 +76,7 @@
         <td>Daily</td>
         <td>10:00</td>
         <td>11:20</td>
-        <td><button class="btn btn-danger" type="button">&times;</button></td>
+        <td><button class="btn btn-danger" type="button" title="Remove">&times;</button></td>
       </tr>
       <tr>
         <td>
@@ -88,7 +96,7 @@
         <td>
           <div class="input-group clockpicker">
             <input type="text" class="form-control" value="09:30">
-            <span class="input-group-addon">
+            <span class="input-group-addon no-indent">
               <span class="glyphicon glyphicon-time"></span>
             </span>
           </div>
@@ -96,12 +104,12 @@
         <td>
           <div class="input-group clockpicker">
             <input type="text" class="form-control" value="09:30">
-            <span class="input-group-addon">
+            <span class="input-group-addon no-indent">
               <span class="glyphicon glyphicon-time"></span>
             </span>
           </div>
         </td>
-        <td><button class="btn btn-primary" type="button">&plus;</button></td>
+        <td><button class="btn btn-primary" type="button" title="Add">&plus;</button></td>
       </tr>
     </tbody>
   </table>

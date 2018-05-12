@@ -20,8 +20,13 @@
   font-size: 90px;
 }
 
-.table {
-  width: auto;
+.table-schedule {
+  font-size: large;
+  text-indent: 5px;
+}
+
+.no-indent {
+  text-indent: 0px !important;
 }
 
 .table > tbody > tr > td {
@@ -35,13 +40,21 @@
 .control-item {
   padding-top: 2px;
   padding-bottom: 2px;
+  width: 260px;
+  margin-left: 0px;
+  margin-right: auto;
 }
 
 .control-label {
   display: inline-block;
-  width: 100px;
+  width: 110px;
+  font-size: large;
+  vertical-align: middle;
+  text-align: right;
+  padding-right: 7px;
 }
 
 .control-input {
   display: inline-block;
+  width: 130px;
 }

@@ -15,7 +15,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
 
-    <title>Heater Control</title>
+    <title>Heater</title>
 
     <!-- Bootstrap core CSS -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -38,15 +38,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand">Heater Control</a>
+          <a class="navbar-brand">Heater</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <?php
-              setNavBarTab("Home", "index.php");
-              setNavBarTab("Calibrate", "calibrate.php");
-              setNavBarTab("Timer", "timer.php");
-              setNavBarTab("Log", "log.php");
+              setNavBarTab("Control", "index.php");
+              setNavBarTab("Diagnostic", "calibrate.php");
             ?>
           </ul>
         </div>
