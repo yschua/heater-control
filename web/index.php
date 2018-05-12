@@ -14,15 +14,14 @@
   </div>
 
   <div class="control-item">
-    <div class="dropdown">
-      <div class="control-label">Temperature</div>
-      <button class="btn btn-lg btn-primary dropdown-toggle control-input" type="button" data-toggle="dropdown">
-        <?php echo GetSelectedTemperature();?> &deg;C <span class="caret"></span>
+    <div class="control-label">Temperature</div>
+    <div class="control-input dropdown">
+      <button class="btn btn-lg btn-block btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+        <span class="pull-left"><span class="caret"></span> <?php echo GetSelectedTemperature();?> &deg;C</span>
       </button>
-
       <ul class="dropdown-menu">
         <?php
-          for ($temp = 10.0; $temp <= 20.0; $temp += 0.5) {
+          for ($temp = 15.0; $temp <= 20.0; $temp += 0.5) {
             printf(
               "<li><a href=\"#t-%.1f\" class=\"btn-input%s\">%.1f</a></li>\n",
               $temp,
@@ -36,12 +35,11 @@
   </div>
 
   <div class="control-item">
-    <div class="dropdown">
-      <div class="control-label">Timeout</div>
-      <button class="btn btn-lg btn-primary dropdown-toggle control-input" type="button" data-toggle="dropdown" <?php if (!GetSelectedPower()) { echo "disabled"; }?>>
-        <?php echo GetTimeoutStr(); ?> <span class="caret"></span>
+    <div class="control-label">Timeout</div>
+    <div class="control-input dropdown">
+      <button class="btn btn-lg btn-default dropdown-toggle control-input" type="button" data-toggle="dropdown" <?php if (!GetSelectedPower()) { echo "disabled"; }?>>
+        <span class="pull-left"><span class="caret"></span> <?php echo GetTimeoutStr(); ?></span></span>
       </button>
-
       <ul class="dropdown-menu">
         <li><a href="#o-0" class="btn-input">OFF</a></li>
         <li><a href="#o-30" class="btn-input">30 min</a></li>

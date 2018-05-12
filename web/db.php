@@ -72,7 +72,7 @@
     global $pdo;
 
     if (is_null($row->timeout)) {
-      return "30 min";
+      return "OFF";
     }
 
     $query = sprintf("SELECT strftime('%%H:%%M', '%s')", $row->timeout);
