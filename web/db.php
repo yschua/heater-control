@@ -88,4 +88,14 @@
     $stmt = $pdo->prepare(GetUpdateSql("timeout", $datetime));
     $stmt->execute();
   }
+
+  function AddSchedule($days, $start, $end) {
+    if ($start >= $end) {
+      return;
+    }
+
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO schedule (days, start_time, end_time) VALUES (?, ?, ?)");
+    $stmt->execute(array(strtolower($days), $start, $end));
+  }
 ?>

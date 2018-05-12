@@ -16,8 +16,8 @@
   <div class="control-item">
     <div class="control-label">Temperature</div>
     <div class="control-input dropdown">
-      <button class="btn btn-lg btn-block btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-        <span class="pull-left"><span class="caret"></span> <?php echo GetSelectedTemperature();?> &deg;C</span>
+      <button class="btn btn-lg btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+        <span class="pull-left"><span class="caret"></span> <?php echo GetSelectedTemperature();?>&deg;C</span>
       </button>
       <ul class="dropdown-menu">
         <?php
@@ -37,7 +37,7 @@
   <div class="control-item">
     <div class="control-label">Timeout</div>
     <div class="control-input dropdown">
-      <button class="btn btn-lg btn-default dropdown-toggle control-input" type="button" data-toggle="dropdown" <?php if (!GetSelectedPower()) { echo "disabled"; }?>>
+      <button class="btn btn-lg btn-default dropdown-toggle" type="button" data-toggle="dropdown" <?php if (!GetSelectedPower()) { echo "disabled"; }?>>
         <span class="pull-left"><span class="caret"></span> <?php echo GetTimeoutStr(); ?></span></span>
       </button>
       <ul class="dropdown-menu">
@@ -78,7 +78,7 @@
       </tr>
       <tr>
         <td>
-          <select class="form-control">
+          <select class="form-control" id="scheduleDays">
             <option>Daily</option>
             <option>Weekdays</option>
             <option>Weekend</option>
@@ -93,21 +93,17 @@
         </td>
         <td>
           <div class="input-group clockpicker">
-            <input type="text" class="form-control" value="09:30">
-            <span class="input-group-addon no-indent">
-              <span class="glyphicon glyphicon-time"></span>
-            </span>
+            <input type="text" class="form-control" value="09:30" id="scheduleStart">
+            <span class="input-group-addon no-indent"><span class="glyphicon glyphicon-time"></span></span>
           </div>
         </td>
         <td>
           <div class="input-group clockpicker">
-            <input type="text" class="form-control" value="09:30">
-            <span class="input-group-addon no-indent">
-              <span class="glyphicon glyphicon-time"></span>
-            </span>
+            <input type="text" class="form-control" value="10:00" id="scheduleEnd">
+            <span class="input-group-addon no-indent"><span class="glyphicon glyphicon-time"></span></span>
           </div>
         </td>
-        <td><button class="btn btn-primary" type="button" title="Add">&plus;</button></td>
+        <td><button class="btn btn-primary submit-schedule" type="button" title="Add">&plus;</button></td>
       </tr>
     </tbody>
   </table>
@@ -135,5 +131,37 @@
 <script type="text/javascript">
   $(".clockpicker").clockpicker({
     autoclose: true
+  });
+</script>
+<script>
+  $(document).ready(function() {
+    $(".submit-schedule").click(function() {
+      var daysElem = document.getElementById("scheduleDays");
+      var days = daysElem[daysElem.selectedIndex].value;
+      var start = document.getElementById("scheduleStart").value;
+      var end = document.getElementById("scheduleEnd").value;
+      var action = "add";
+      var id = "0";
+
+      if (action == "add")
+      {
+        if (start >= end) {
+          alert("Invalid times.");
+          return;
+        }
+      }
+
+      var url = "schedule-update.php";
+      var data = {
+        "action": action,
+        "id": id,
+        "days": days,
+        "start": start,
+        "end": end
+      };
+      var fnReload = function() { location.reload(); };
+
+      $.post(url, data);
+    });
   });
 </script>
