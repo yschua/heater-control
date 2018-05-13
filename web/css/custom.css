@@ -58,3 +58,7 @@
   display: inline-block;
   width: 130px;
 }
+
+input:read-only {
+  background-color: white !important;
+}

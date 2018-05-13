@@ -110,13 +110,13 @@
         </td>
         <td>
           <div class="input-group clockpicker">
-            <input type="text" class="form-control" value="09:30" id="scheduleStart">
+            <input type="text" class="form-control" value="09:30" id="scheduleStart" readonly>
             <span class="input-group-addon no-indent"><span class="glyphicon glyphicon-time"></span></span>
           </div>
         </td>
         <td>
           <div class="input-group clockpicker">
-            <input type="text" class="form-control" value="10:00" id="scheduleEnd">
+            <input type="text" class="form-control" value="10:00" id="scheduleEnd" readonly>
             <span class="input-group-addon no-indent"><span class="glyphicon glyphicon-time"></span></span>
           </div>
         </td>
