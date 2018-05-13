@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS `schedule` (
 	`days`	TEXT NOT NULL,
 	`start_time`	TEXT NOT NULL,
 	`end_time`	TEXT NOT NULL,
-	`mode`	TEXT
+	`mode`	TEXT,
+	`is_enable`	INTEGER NOT NULL DEFAULT 1
 );
 CREATE TABLE IF NOT EXISTS `heater` (
 	`heater_id`	INTEGER NOT NULL,
@@ -15,7 +16,8 @@ CREATE TABLE IF NOT EXISTS `heater` (
 	`is_active`	NUMERIC NOT NULL DEFAULT 0,
 	`timeout`	TEXT,
 	`mode`	TEXT,
+	`schedule_enable`	INTEGER NOT NULL,
 	PRIMARY KEY(`heater_id`)
 );
-INSERT INTO `heater` (heater_id,selected_power,selected_temperature,current_power,current_temperature,is_active,timeout,mode) VALUES (1,0,20.0,0,20.0,0,NULL,NULL);
+INSERT INTO `heater` (heater_id,selected_power,selected_temperature,current_power,current_temperature,is_active,timeout,mode,schedule_enable) VALUES (1,0,20.0,0,20.0,0,NULL,NULL,1);
 COMMIT;
