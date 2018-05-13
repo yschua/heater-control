@@ -5,6 +5,7 @@
 
 <div class="container">
 
+  <!-- Power control -->
   <div class="control-item">
     <div class="control-label">Power</div>
     <div class="btn-group control-input">
@@ -13,6 +14,7 @@
     </div>
   </div>
 
+  <!-- Temperature control -->
   <div class="control-item">
     <div class="control-label">Temperature</div>
     <div class="control-input dropdown">
@@ -34,6 +36,7 @@
     </div>
   </div>
 
+  <!-- Timeout control -->
   <div class="control-item">
     <div class="control-label">Timeout</div>
     <div class="control-input dropdown">
@@ -50,11 +53,12 @@
     </div>
   </div>
 
+  <!-- Schedule control -->
   <div class="control-item">
     <div class="control-label">Schedule</div>
     <div class="btn-group control-input">
-      <a href="#" class="btn btn-lg col-xs-6 btn-input btn-default">ON</a>
-      <a href="#" class="btn btn-lg col-xs-6 btn-input btn-danger">OFF</a>
+      <a href="#s-1" class="btn btn-lg col-xs-6 btn-input btn-<?php echo GetScheduleEnable() ? "primary" : "default";?>">ON</a>
+      <a href="#s-0" class="btn btn-lg col-xs-6 btn-input btn-<?php echo !GetScheduleEnable() ? "danger" : "default";?>">OFF</a>
     </div>
   </div>
 
@@ -70,12 +74,24 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td>Daily</td>
-        <td>10:00</td>
-        <td>11:20</td>
-        <td><button class="btn btn-danger" type="button" title="Remove">&times;</button></td>
-      </tr>
+      <!-- List schedules -->
+      <?php
+        foreach (GetSchedules() as $schedule) {
+          printf(
+            "<tr>
+              <td>%s</td>
+              <td>%s</td>
+              <td>%s</td>
+              <td><button class=\"btn btn-danger delete-schedule\" id=\"%s\" type=\"button\" title=\"Remove\">&times;</button></td>
+             </tr>",
+            $schedule["days"],
+            $schedule["start_time"],
+            $schedule["end_time"],
+            $schedule["schedule_id"]
+          );
+        }
+      ?>
+      <!-- Insert schedule -->
       <tr>
         <td>
           <select class="form-control" id="scheduleDays">
@@ -103,7 +119,7 @@
             <span class="input-group-addon no-indent"><span class="glyphicon glyphicon-time"></span></span>
           </div>
         </td>
-        <td><button class="btn btn-primary submit-schedule" type="button" title="Add">&plus;</button></td>
+        <td><button class="btn btn-primary add-schedule" type="button" title="Add">&plus;</button></td>
       </tr>
     </tbody>
   </table>
@@ -114,54 +130,62 @@
   require "footer.php";
 ?>
 
-<script>
+<!-- TODO reload on page active -->
+<script type="text/javascript" src="bootstrap/js/bootstrap-clockpicker.min.js"></script>
+<script type="text/javascript">
+  // Clockpicker
+  $(".clockpicker").clockpicker({
+    autoclose: true
+  });
+
+  var fnReload = function() { location.reload(); };
+
+  // Heater controls
+  // TODO fix this retarded message encoded in href hack
   $(document).ready(function() {
     $(".btn-input").click(function() {
       var url = "updatedb.php";
       var message = $(this).attr("href");
       var data = { "message": message };
-      var fnReload = function() { location.reload(); };
-
       $.post(url, data, fnReload);
     });
   });
-</script>
-<!-- TODO reload on page active -->
-<script type="text/javascript" src="bootstrap/js/bootstrap-clockpicker.min.js"></script>
-<script type="text/javascript">
-  $(".clockpicker").clockpicker({
-    autoclose: true
-  });
-</script>
-<script>
+
+  // Insert schedule
   $(document).ready(function() {
-    $(".submit-schedule").click(function() {
+    $(".add-schedule").click(function() {
       var daysElem = document.getElementById("scheduleDays");
       var days = daysElem[daysElem.selectedIndex].value;
       var start = document.getElementById("scheduleStart").value;
       var end = document.getElementById("scheduleEnd").value;
-      var action = "add";
-      var id = "0";
 
-      if (action == "add")
-      {
-        if (start >= end) {
-          alert("Invalid times.");
-          return;
-        }
+      if (start >= end) {
+        alert("Invalid times.");
+        return;
       }
 
       var url = "schedule-update.php";
       var data = {
-        "action": action,
-        "id": id,
+        "action": "add",
         "days": days,
         "start": start,
         "end": end
       };
-      var fnReload = function() { location.reload(); };
+      $.post(url, data, fnReload);
+    });
+  });
 
-      $.post(url, data);
+  // Delete schedule
+  $(document).ready(function() {
+    $(".delete-schedule").click(function() {
+      if (window.confirm("Click OK to remove.")) {
+        var url = "schedule-update.php";
+        var data = {
+          "action": "delete",
+          "key": this.id
+        };
+        $.post(url, data, fnReload);
+      }
     });
   });
 </script>

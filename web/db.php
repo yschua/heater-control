@@ -96,6 +96,31 @@
 
     global $pdo;
     $stmt = $pdo->prepare("INSERT INTO schedule (days, start_time, end_time) VALUES (?, ?, ?)");
-    $stmt->execute(array(strtolower($days), $start, $end));
+    $stmt->execute(array($days, $start, $end));
+  }
+
+  function GetSchedules() {
+    global $pdo;
+    $stmt = $pdo->query("SELECT * FROM schedule");
+    return $stmt->fetchAll();
+  }
+
+  function DeleteSchedule($key) {
+    global $pdo;
+    $stmt = $pdo->prepare("DELETE FROM schedule WHERE schedule_id = ?");
+    $stmt->execute(array($key));
+  }
+
+  function SetScheduleEnable($enable) {
+    if ($enable != GetScheduleEnable()) {
+      global $pdo;
+      $stmt = $pdo->prepare(GetUpdateSql("schedule_enable", $enable));
+      $stmt->execute();
+    }
+  }
+
+  function GetScheduleEnable() {
+    global $row;
+    return $row->schedule_enable;
   }
 ?>
