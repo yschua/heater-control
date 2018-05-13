@@ -45,10 +45,11 @@
       </button>
       <ul class="dropdown-menu">
         <li><a href="#o-0" class="btn-input">OFF</a></li>
+        <li><a href="#o-15" class="btn-input">15 min</a></li>
         <li><a href="#o-30" class="btn-input">30 min</a></li>
+        <li><a href="#o-45" class="btn-input">45 min</a></li>
         <li><a href="#o-60" class="btn-input">60 min</a></li>
         <li><a href="#o-120" class="btn-input">120 min</a></li>
-        <li><a href="#o-180" class="btn-input">180 min</a></li>
       </ul>
     </div>
   </div>
