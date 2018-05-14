@@ -2,8 +2,8 @@
   include "db.php";
 
   const DEFAULT_TIMEOUT = 30;
-  const MIN_TEMP = 10;
-  const MAX_TEMP = 20;
+  const MIN_TEMP = 10.0;
+  const MAX_TEMP = 20.0;
 
   $message = $_POST["message"];
 
@@ -18,34 +18,33 @@
 
   if (strtolower($operation) == "p") {
     if ($value == 0 || $value == 1) {
-      SetSelectedPower($value);
+      $db->SetSelectedPower($value);
       if ($operation == "P") { // calibrate message
-        SetCurrentPower($value);
+        $db->SetCurrentPower($value);
       }
       if ($value == 0) { // on power off
-        SetTimeout(0);
-      } else if (GetSelectedPower() != 1) { // always default to a timeout value
-        SetTimeout(DEFAULT_TIMEOUT);
+        $db->SetTimeout(0);
+      } else if ($db->GetSelectedPower() != 1) { // always default to a timeout value
+        $db->SetTimeout(DEFAULT_TIMEOUT);
       }
     }
   }
 
   if (strtolower($operation) == "t") {
-    if ($value >= MIN_TEMP && $value <= MAX_TEMP) {
-      SetSelectedTemperature($value);
-      if ($operation == "T") { // calibrate message
-        SetCurrentTemperature($value);
-      }
+    $value = min(MAX_TEMP, max(MIN_TEMP, $value));
+    $db->SetSelectedTemperature($value);
+    if ($operation == "T") { // calibrate message
+      $db->SetCurrentTemperature($value);
     }
   }
 
   if ($operation == "o") {
     if ($value >= 0) {
-      SetTimeout($value);
+      $db->SetTimeout($value);
     }
   }
 
-  if ($operation == "s") {
-    SetScheduleEnable($value);
-  }
+  // if ($operation == "s") {
+  //   SetScheduleEnable($value);
+  // }
 ?>

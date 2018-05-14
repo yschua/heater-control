@@ -9,8 +9,8 @@
   <div class="control-item">
     <div class="control-label">Power</div>
     <div class="btn-group control-input">
-      <a href="#p-1" class="btn btn-lg btn-input col-xs-6 btn-<?php echo GetSelectedPower() ? "primary active" : "default";?>">ON</a>
-      <a href="#p-0" class="btn btn-lg btn-input col-xs-6 btn-<?php echo !GetSelectedPower() ? "danger active" : "default";?>">OFF</a>
+      <a href="#p-1" class="btn btn-lg btn-input col-xs-6 btn-<?php echo $db->GetSelectedPower() ? "primary active" : "default";?>">ON</a>
+      <a href="#p-0" class="btn btn-lg btn-input col-xs-6 btn-<?php echo !$db->GetSelectedPower() ? "danger active" : "default";?>">OFF</a>
     </div>
   </div>
 
@@ -19,7 +19,7 @@
     <div class="control-label">Temperature</div>
     <div class="control-input dropdown">
       <button class="btn btn-lg btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-        <span class="pull-left"><span class="caret"></span> <?php echo GetSelectedTemperature();?>&deg;C</span>
+        <span class="pull-left"><span class="caret"></span> <?php printf("%.1f", $db->GetSelectedTemperature());?>&deg;C</span>
       </button>
       <ul class="dropdown-menu">
         <?php
@@ -27,7 +27,7 @@
             printf(
               "<li><a href=\"#t-%.1f\" class=\"btn-input%s\">%.1f</a></li>\n",
               $temp,
-              (GetSelectedTemperature() == $temp) ? " btn-default" : "",
+              ($db->GetSelectedTemperature() == $temp) ? " btn-default" : "",
               $temp
             );
           }
@@ -40,8 +40,8 @@
   <div class="control-item">
     <div class="control-label">Timeout</div>
     <div class="control-input dropdown">
-      <button class="btn btn-lg btn-default dropdown-toggle" type="button" data-toggle="dropdown" <?php if (!GetSelectedPower()) { echo "disabled"; }?>>
-        <span class="pull-left"><span class="caret"></span> <?php echo GetTimeoutStr(); ?></span></span>
+      <button class="btn btn-lg btn-default dropdown-toggle" type="button" data-toggle="dropdown" <?php if (!$db->GetSelectedPower()) { echo "disabled"; }?>>
+        <span class="pull-left"><span class="caret"></span> <?php echo $db->GetTimeoutStr(); ?></span></span>
       </button>
       <ul class="dropdown-menu">
         <li><a href="#o-0" class="btn-input">OFF</a></li>
@@ -53,15 +53,6 @@
       </ul>
     </div>
   </div>
-
-  <!-- Schedule control -->
-  <!-- <div class="control-item">
-    <div class="control-label">Schedule</div>
-    <div class="btn-group control-input">
-      <a href="#s-1" class="btn btn-lg col-xs-6 btn-input btn-<?php echo GetScheduleEnable() ? "primary" : "default";?>">ON</a>
-      <a href="#s-0" class="btn btn-lg col-xs-6 btn-input btn-<?php echo !GetScheduleEnable() ? "danger" : "default";?>">OFF</a>
-    </div>
-  </div> -->
 
   <hr>
 
@@ -78,7 +69,7 @@
     <tbody>
       <!-- List schedules -->
       <?php
-        foreach (GetSchedules() as $schedule) {
+        foreach ($db->GetScheduleArray() as $schedule) {
           printf(
             "<tr>
               <td><input class=\"enable-schedule\" id=\"%s\" type=\"checkbox\" checked data-toggle=\"toggle\" data-size=\"mini\"></td>

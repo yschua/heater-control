@@ -6,17 +6,17 @@
 <div class="container">
 
   <?php
-    printf("current_power: %d<br>", GetCurrentPower());
-    printf("selected_power: %d<br>", GetSelectedPower());
-    printf("current_temperature: %.1f<br>", GetCurrentTemperature());
-    printf("selected_temperature: %.1f<br>", GetSelectedTemperature());
+    printf("current_power: %d<br>", $db->GetCurrentPower());
+    printf("selected_power: %d<br>", $db->GetSelectedPower());
+    printf("current_temperature: %.1f<br>", $db->GetCurrentTemperature());
+    printf("selected_temperature: %.1f<br>", $db->GetSelectedTemperature());
   ?>
 
   <h5>
     <div class="control-label">Heater</div>
     <div class="btn-group">
-      <a href="#P-1" class="btn btn-input btn-<?php echo GetSelectedPower() ? "primary" : "default";?>">ON</a>
-      <a href="#P-0" class="btn btn-input btn-<?php echo !GetSelectedPower() ? "primary" : "default";?>">OFF</a>
+      <a href="#P-1" class="btn btn-input btn-<?php echo $db->GetSelectedPower() ? "primary" : "default";?>">ON</a>
+      <a href="#P-0" class="btn btn-input btn-<?php echo !$db->GetSelectedPower() ? "primary" : "default";?>">OFF</a>
     </div>
   </h5>
 
@@ -24,7 +24,7 @@
     <div class="dropdown">
       <div class="control-label">Thermostat</div>
       <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-        <?php echo GetSelectedTemperature();?> &deg;C <span class="caret"></span>
+        <?php echo $db->GetSelectedTemperature();?> &deg;C <span class="caret"></span>
       </button>
 
       <ul class="dropdown-menu">
@@ -33,7 +33,7 @@
             printf(
               "<li><a href=\"#T-%.1f\" class=\"btn-input%s\">%.1f</a></li>",
               $temp,
-              (GetSelectedTemperature() == $temp) ? " btn-default" : "",
+              ($db->GetSelectedTemperature() == $temp) ? " btn-default" : "",
               $temp
             );
           }

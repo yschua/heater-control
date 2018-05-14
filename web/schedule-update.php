@@ -2,10 +2,10 @@
   include "db.php";
 
   if ($_POST["action"] == "add") {
-    AddSchedule($_POST["days"], $_POST["start"], $_POST["end"]);
+    $db->AddSchedule($_POST["days"], $_POST["start"], $_POST["end"]);
   }
 
   if ($_POST["action"] == "delete") {
-    DeleteSchedule($_POST["key"]);
+    $db->DeleteSchedule($_POST["key"]);
   }
 ?>
