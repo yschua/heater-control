@@ -2,4 +2,6 @@
 *.db
 *.db-journal
 *.out
+*.sublime-project
+*.sublime-workspace
 __pycache__/
