@@ -47,7 +47,7 @@
 
 .control-label {
   display: inline-block;
-  width: 110px;
+  width: 120px;
   font-size: large;
   vertical-align: middle;
   text-align: right;
@@ -56,7 +56,22 @@
 
 .control-input {
   display: inline-block;
-  width: 130px;
+  width: 110px;
+}
+
+.control-input > .dropdown-toggle {
+  text-align: right;
+}
+
+.dropdown-menu {
+  min-width: 100%;
+}
+
+.dropdown-menu > li > a {
+  line-height: 35px;
+  vertical-align: middle;
+  font-size: large;
+  text-align: right;
 }
 
 input:read-only {

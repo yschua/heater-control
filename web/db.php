@@ -30,7 +30,7 @@
       $timeout = $this->controls["timeout"];
 
       if (is_null($timeout)) {
-        return "OFF";
+        return "Off";
       }
 
       $stmt = $this->db->prepare("SELECT strftime('%H:%M', ?)");

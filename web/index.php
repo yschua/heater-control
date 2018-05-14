@@ -9,8 +9,8 @@
   <div class="control-item">
     <div class="control-label">Power</div>
     <div class="btn-group control-input">
-      <a href="#p-1" class="btn btn-lg btn-input col-xs-6 btn-<?php echo $db->GetSelectedPower() ? "primary active" : "default";?>">ON</a>
-      <a href="#p-0" class="btn btn-lg btn-input col-xs-6 btn-<?php echo !$db->GetSelectedPower() ? "danger active" : "default";?>">OFF</a>
+      <a href="#p-1" class="btn btn-lg btn-input col-xs-6 btn-<?php echo $db->GetSelectedPower() ? "primary active" : "default";?>">On</a>
+      <a href="#p-0" class="btn btn-lg btn-input col-xs-6 btn-<?php echo !$db->GetSelectedPower() ? "danger active" : "default";?>">Off</a>
     </div>
   </div>
 
@@ -18,8 +18,8 @@
   <div class="control-item">
     <div class="control-label">Temperature</div>
     <div class="control-input dropdown">
-      <button class="btn btn-lg btn-default dropdown-toggle" type="button" data-toggle="dropdown">
-        <span class="pull-left"><span class="caret"></span> <?php printf("%.1f", $db->GetSelectedTemperature());?>&deg;C</span>
+      <button class="btn btn-lg btn-block btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+        <?php printf("%.1f", $db->GetSelectedTemperature());?>&deg;C <span class="caret" />
       </button>
       <ul class="dropdown-menu">
         <?php
@@ -40,11 +40,11 @@
   <div class="control-item">
     <div class="control-label">Timeout</div>
     <div class="control-input dropdown">
-      <button class="btn btn-lg btn-default dropdown-toggle" type="button" data-toggle="dropdown" <?php if (!$db->GetSelectedPower()) { echo "disabled"; }?>>
-        <span class="pull-left"><span class="caret"></span> <?php echo $db->GetTimeoutStr(); ?></span></span>
+      <button class="btn btn-lg btn-block btn-default dropdown-toggle" type="button" data-toggle="dropdown" <?php if (!$db->GetSelectedPower()) { echo "disabled"; }?>>
+        <?php echo $db->GetTimeoutStr(); ?> <span class="caret" />
       </button>
       <ul class="dropdown-menu">
-        <li><a href="#o-0" class="btn-input">OFF</a></li>
+        <li><a href="#o-0" class="btn-input">Off</a></li>
         <li><a href="#o-15" class="btn-input">15 min</a></li>
         <li><a href="#o-30" class="btn-input">30 min</a></li>
         <li><a href="#o-45" class="btn-input">45 min</a></li>
