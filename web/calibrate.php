@@ -13,7 +13,7 @@
   ?>
 
   <h5>
-    Heater
+    <div class="control-label">Heater</div>
     <div class="btn-group">
       <a href="#P-1" class="btn btn-input btn-<?php echo GetSelectedPower() ? "primary" : "default";?>">ON</a>
       <a href="#P-0" class="btn btn-input btn-<?php echo !GetSelectedPower() ? "primary" : "default";?>">OFF</a>
@@ -22,7 +22,7 @@
 
   <h5>
     <div class="dropdown">
-      Thermostat
+      <div class="control-label">Thermostat</div>
       <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
         <?php echo GetSelectedTemperature();?> &deg;C <span class="caret"></span>
       </button>
@@ -51,7 +51,7 @@
 <script>
   $(document).ready(function() {
     $(".btn-input").click(function() {
-      var url = "updatedb.php";
+      var url = "control-update.php";
       var message = $(this).attr("href");
       var data = { "message": message };
       var fnReload = function() { location.reload(); };

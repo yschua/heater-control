@@ -150,7 +150,7 @@
   // TODO fix this retarded message encoded in href hack
   $(document).ready(function() {
     $(".btn-input").click(function() {
-      var url = "updatedb.php";
+      var url = "control-update.php";
       var message = $(this).attr("href");
       var data = { "message": message };
       $.post(url, data, fnReload);
