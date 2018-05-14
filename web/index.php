@@ -9,8 +9,8 @@
   <div class="control-item">
     <div class="control-label">Power</div>
     <div class="btn-group control-input">
-      <a href="#p-1" class="btn btn-lg btn-input col-xs-6 btn-<?php echo GetSelectedPower() ? "primary" : "default";?>">ON</a>
-      <a href="#p-0" class="btn btn-lg btn-input col-xs-6 btn-<?php echo !GetSelectedPower() ? "danger" : "default";?>">OFF</a>
+      <a href="#p-1" class="btn btn-lg btn-input col-xs-6 btn-<?php echo GetSelectedPower() ? "primary active" : "default";?>">ON</a>
+      <a href="#p-0" class="btn btn-lg btn-input col-xs-6 btn-<?php echo !GetSelectedPower() ? "danger active" : "default";?>">OFF</a>
     </div>
   </div>
 
@@ -55,20 +55,21 @@
   </div>
 
   <!-- Schedule control -->
-  <div class="control-item">
+  <!-- <div class="control-item">
     <div class="control-label">Schedule</div>
     <div class="btn-group control-input">
       <a href="#s-1" class="btn btn-lg col-xs-6 btn-input btn-<?php echo GetScheduleEnable() ? "primary" : "default";?>">ON</a>
       <a href="#s-0" class="btn btn-lg col-xs-6 btn-input btn-<?php echo !GetScheduleEnable() ? "danger" : "default";?>">OFF</a>
     </div>
-  </div>
+  </div> -->
 
   <hr>
 
   <table class="table table-schedule">
     <thead>
       <tr>
-        <th class="col-xs-4">Days</th>
+        <th></th>
+        <th class="col-xs-3">Days</th>
         <th>Start</th>
         <th>End</th>
         <th></th>
@@ -80,11 +81,13 @@
         foreach (GetSchedules() as $schedule) {
           printf(
             "<tr>
+              <td><input class=\"enable-schedule\" id=\"%s\" type=\"checkbox\" checked data-toggle=\"toggle\" data-size=\"mini\"></td>
               <td>%s</td>
               <td>%s</td>
               <td>%s</td>
               <td><button class=\"btn btn-danger delete-schedule\" id=\"%s\" type=\"button\" title=\"Remove\">&times;</button></td>
              </tr>",
+            $schedule["schedule_id"],
             $schedule["days"],
             $schedule["start_time"],
             $schedule["end_time"],
@@ -94,6 +97,7 @@
       ?>
       <!-- Insert schedule -->
       <tr>
+        <td></td>
         <td>
           <select class="form-control" id="scheduleDays">
             <option>Daily</option>
@@ -133,6 +137,7 @@
 
 <!-- TODO reload on page active -->
 <script type="text/javascript" src="bootstrap/js/bootstrap-clockpicker.min.js"></script>
+<script type="text/javascript" src="bootstrap/js/bootstrap-toggle.min.js"></script>
 <script type="text/javascript">
   // Clockpicker
   $(".clockpicker").clockpicker({

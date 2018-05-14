@@ -62,3 +62,7 @@
 input:read-only {
   background-color: white !important;
 }
+
+.toggle.btn {
+  text-indent: 0px !important;
+}
