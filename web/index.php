@@ -72,13 +72,14 @@
         foreach ($db->GetScheduleArray() as $schedule) {
           printf(
             "<tr>
-              <td><input class=\"enable-schedule\" id=\"%s\" type=\"checkbox\" checked data-toggle=\"toggle\" data-size=\"mini\"></td>
+              <td><input class=\"enable-schedule\" id=\"%s\" type=\"checkbox\" data-toggle=\"toggle\" data-size=\"mini\" %s></td>
               <td>%s</td>
               <td>%s</td>
               <td>%s</td>
               <td><button class=\"btn btn-danger delete-schedule\" id=\"%s\" type=\"button\" title=\"Remove\">&times;</button></td>
              </tr>",
             $schedule["schedule_id"],
+            $schedule["is_enable"] == 1 ? "checked" : "",
             $db->GetDayArray()[$schedule["day_id"]],
             $schedule["start_time"],
             $schedule["end_time"],
@@ -183,4 +184,18 @@
       }
     });
   });
+
+  // Enable schedule
+  $(document).ready(function() {
+    $(".enable-schedule").change(function() {
+      var url = "schedule-update.php";
+      var data = {
+        "action": "enable",
+        "scheduleKey": this.id,
+        "value": this.checked ? 1 : 0
+      };
+      $.post(url, data);
+    });
+  });
+
 </script>

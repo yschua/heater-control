@@ -133,6 +133,14 @@
     {
       return $this->days;
     }
+
+    function SetEnableSchedule($key, $value)
+    {
+      $stmt = $this->db->prepare("UPDATE schedule SET is_enable = ? WHERE schedule_id = ?");
+      $stmt->bindValue(1, $value, SQLITE3_INTEGER);
+      $stmt->bindValue(2, $key, SQLITE3_INTEGER);
+      $stmt->execute();
+    }
   }
 
   $db = new DB("../db/home.db");
