@@ -43,8 +43,4 @@
       $db->SetTimeout($value);
     }
   }
-
-  // if ($operation == "s") {
-  //   SetScheduleEnable($value);
-  // }
 ?>

@@ -79,7 +79,7 @@
               <td><button class=\"btn btn-danger delete-schedule\" id=\"%s\" type=\"button\" title=\"Remove\">&times;</button></td>
              </tr>",
             $schedule["schedule_id"],
-            $schedule["days"],
+            $db->GetDayArray()[$schedule["day_id"]],
             $schedule["start_time"],
             $schedule["end_time"],
             $schedule["schedule_id"]
@@ -91,16 +91,14 @@
         <td></td>
         <td>
           <select class="form-control" id="scheduleDays">
-            <option>Daily</option>
-            <option>Weekdays</option>
-            <option>Weekend</option>
-            <option>Monday</option>
-            <option>Tuesday</option>
-            <option>Wednesday</option>
-            <option>Thursday</option>
-            <option>Friday</option>
-            <option>Saturday</option>
-            <option>Sunday</option>
+            <?php
+              $days = $db->GetDayArray();
+              while ($name = current($days)) {
+                $key = key($days);
+                next($days);
+                printf("<option id=\"%d\">%s</option>", $key, $name);
+              }
+            ?>
           </select>
         </td>
         <td>
@@ -152,7 +150,7 @@
   $(document).ready(function() {
     $(".add-schedule").click(function() {
       var daysElem = document.getElementById("scheduleDays");
-      var days = daysElem[daysElem.selectedIndex].value;
+      var dayKey = daysElem[daysElem.selectedIndex].id;
       var start = document.getElementById("scheduleStart").value;
       var end = document.getElementById("scheduleEnd").value;
 
@@ -164,7 +162,7 @@
       var url = "schedule-update.php";
       var data = {
         "action": "add",
-        "days": days,
+        "dayKey": dayKey,
         "start": start,
         "end": end
       };
@@ -179,7 +177,7 @@
         var url = "schedule-update.php";
         var data = {
           "action": "delete",
-          "key": this.id
+          "scheduleKey": this.id
         };
         $.post(url, data, fnReload);
       }

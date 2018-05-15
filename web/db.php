@@ -3,16 +3,18 @@
   {
     private $db;
     private $controls;
+    private $days;
 
     function __construct($filename)
     {
       $this->db = new SQLite3($filename);
-      $this->controls = $this->GetControls();
+      $this->controls = $this->StoreControls();
+      $this->days = $this->StoreDays();
     }
 
     /* Control methods */
 
-    private function GetControls()
+    private function StoreControls()
     {
       $stmt = $this->db->prepare("SELECT * FROM heater WHERE heater_id = 1");
       $result = $stmt->execute();
@@ -95,13 +97,13 @@
       return $ret;
     }
 
-    function AddSchedule($days, $start, $end)
+    function AddSchedule($dayKey, $start, $end)
     {
       if ($start >= $end) {
         return;
       }
-      $stmt = $this->db->prepare("INSERT INTO schedule (days, start_time, end_time) VALUES (?, ?, ?)");
-      $stmt->bindValue(1, $days, SQLITE3_TEXT);
+      $stmt = $this->db->prepare("INSERT INTO schedule (day_id, start_time, end_time) VALUES (?, ?, ?)");
+      $stmt->bindValue(1, $dayKey, SQLITE3_INTEGER);
       $stmt->bindValue(2, $start, SQLITE3_TEXT);
       $stmt->bindValue(3, $end, SQLITE3_TEXT);
       $stmt->execute();
@@ -112,6 +114,24 @@
       $stmt = $this->db->prepare("DELETE FROM schedule WHERE schedule_id = ?");
       $stmt->bindValue(1, $key, SQLITE3_INTEGER);
       $stmt->execute();
+    }
+
+    private function StoreDays()
+    {
+      $stmt = $this->db->prepare("SELECT * FROM day");
+      $result = $stmt->execute();
+      $ret = array();
+      while ($day = $result->fetchArray(SQLITE3_ASSOC)) {
+        $key = $day["day_id"];
+        $name = $day["name"];
+        $ret[$key] = $name;
+      }
+      return $ret;
+    }
+
+    function GetDayArray()
+    {
+      return $this->days;
     }
   }
 
