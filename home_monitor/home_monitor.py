@@ -48,8 +48,6 @@ def main():
     # timing is very critical between request receive and request reply
     # this means no expensive queries like sql updates until message is sent
 
-    logging.info('receive update request')
-
     msg_send = get_message(db)
 
     # nothing to update
@@ -106,7 +104,7 @@ def update_current(db):
   db.set_current_power(selected_power)
 
 def send(ser, msg):
-  logging.info('tx: {}'.format(msg.get_str()))
+  logging.debug('tx: {}'.format(msg.get_str()))
   ser.write(msg.get_bytes())
 
 def receive(ser, timeout = None):
@@ -118,7 +116,7 @@ def receive(ser, timeout = None):
     return None
 
   msg = Message.create_from_bytes(bytes_data)
-  logging.info('rx: {}'.format(msg.get_str()))
+  logging.debug('rx: {}'.format(msg.get_str()))
   return msg
 
 if __name__ == '__main__':

@@ -10,6 +10,8 @@ ser = serial.Serial('COM4', 115200, timeout=1)
 
 while True:
   ser.write(bytes([REQUEST]))
-  print(ser.read())
-  ser.write(bytes([SUCCESS]))
+  recv = ser.read()
+  if recv:
+    print(recv)
+    ser.write(bytes([SUCCESS]))
   time.sleep(5)
