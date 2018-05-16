@@ -5,7 +5,7 @@ import homedb
 from message import Message
 
 # TODO auto check OS?
-OS = 'Unix'
+OS = 'Windows'
 
 if OS == 'Unix':
   PORT = '/dev/ttyUSB0'
