@@ -1,7 +1,10 @@
 import serial
 import time
 import logging
-import homedb
+import threading
+import signal
+import sys
+from homedb import HomeDb
 from message import Message
 
 # TODO auto check OS?
@@ -28,96 +31,140 @@ def main():
   logging.basicConfig(
     filename=LOG_PATH,
     level=logging.DEBUG, # TODO set this with command line argument
-    format='[%(asctime)s] %(message)s')
+    format='[%(asctime)s] (%(thread)d) %(threadName)s: %(message)s')
 
-  # sqlite3 database
-  db = homedb.HomeDb(DB_PATH, logging)
+  logging.info('started')
 
-  # serial communications with gateway
-  ser = serial.Serial(PORT, SERIAL_BAUD)
+  exit_handler = ExitHandler()
 
-  logging.info('home_monitor.py started')
+  # initialise threads
+  gateway_server = GatewayServer()
+  gateway_server.start()
 
-  # TODO implement safe exit
-  while True:
-    msg_recv = receive(ser) # blocking until received
+  while not exit_handler.exit():
+    time.sleep(1)
 
-    if not msg_recv or msg_recv.get() != REQUEST:
-      continue
+  # stop threads
+  logging.debug('stopping threads')
+  gateway_server.stop()
+  gateway_server.join()
 
-    # timing is very critical between request receive and request reply
-    # this means no expensive queries like sql updates until message is sent
+  logging.info('ended')
 
-    msg_send = get_message(db)
 
-    # nothing to update
-    if msg_send.get() == 0x0:
-      continue
+class GatewayServer(threading.Thread):
 
-    send(ser, msg_send)
-    msg_recv = receive(ser, 1) # will have to play around with this timeout
+  def __init__(self):
+    threading.Thread.__init__(self)
+    self.name = 'GatewayServer'
+    self._stop_event = threading.Event()
 
-    if msg_recv and msg_recv.get() == SUCCESS:
-      update_current(db)
-    else:
-      logging.error('update failed')
+  def stop(self):
+    self._stop_event.set()
 
-  ser.close()
+  def run(self):
+    logging.debug('started')
 
-def get_message(db):
-  msg = Message()
+    self._db = HomeDb(DB_PATH, logging)
+    self._ser = serial.Serial(PORT, SERIAL_BAUD)
 
-  # turn off on timeout
-  if db.check_timeout():
-    msg.power_toggle()
-    return msg
+    while not self._stop_event.is_set():
+      msg_recv = self._receive(1)
 
-  selected_power = db.get_selected_power()
-  current_power = db.get_current_power()
-  selected_temp = db.get_selected_temp()
-  current_temp = db.get_current_temp()
+      if not msg_recv or msg_recv.get() != REQUEST:
+        continue
 
-  if selected_power != current_power:
-    msg.power_toggle()
+      # timing is very critical between request receive and request reply
+      # this means no expensive queries like sql updates until message is sent
 
-    # ignore temperature change on power off
-    if selected_power == 0:
+      msg_send = self._get_message()
+
+      # Issue #11: reply with null message or silence?
+      if msg_send.get() == 0x0:
+        continue
+
+      self._send(msg_send)
+      msg_recv = self._receive(1) # will have to play around with this timeout
+
+      if msg_recv and msg_recv.get() == SUCCESS:
+        self._update_current_control()
+      else:
+        logging.error('update failed')
+
+    self._ser.close()
+
+    logging.debug('ended')
+
+  def _get_message(self):
+    msg = Message()
+
+    # turn off on timeout
+    if self._db.check_timeout():
+      msg.power_toggle()
       return msg
 
-  if selected_temp != current_temp:
-    delta = selected_temp - current_temp
-    msg.temp_delta(delta * 2)
+    selected_power = self._db.get_selected_power()
+    current_power = self._db.get_current_power()
+    selected_temp = self._db.get_selected_temp()
+    current_temp = self._db.get_current_temp()
 
-  return msg
+    if selected_power != current_power:
+      msg.power_toggle()
 
-def update_current(db):
-  if db.check_timeout():
-    db.clear_timeout()
-    db.set_selected_power(0)
+      # ignore temperature change on power off
+      if selected_power == 0:
+        return msg
 
-  selected_power = db.get_selected_power()
-  current_power = db.get_current_power()
+    if selected_temp != current_temp:
+      delta = selected_temp - current_temp
+      msg.temp_delta(delta * 2)
 
-  # do not update temperature on power off
-  if not (selected_power == 0 and current_power == 1):
-    db.set_current_temp(db.get_selected_temp())
-  db.set_current_power(selected_power)
+    return msg
 
-def send(ser, msg):
-  logging.debug('tx: {}'.format(msg.get_str()))
-  ser.write(msg.get_bytes())
+  def _update_current_control(self):
+    if self._db.check_timeout():
+      self._db.clear_timeout()
+      self._db.set_selected_power(0)
 
-def receive(ser, timeout = None):
-  ser.timeout = timeout
-  bytes_data = ser.read()
+    selected_power = self._db.get_selected_power()
+    current_power = self._db.get_current_power()
 
-  # return null on timeout
-  if not bytes_data:
-    return None
+    # do not update temperature on power off
+    if not (selected_power == 0 and current_power == 1):
+      self._db.set_current_temp(self._db.get_selected_temp())
+    self._db.set_current_power(selected_power)
 
-  msg = Message.create_from_bytes(bytes_data)
-  logging.debug('rx: {}'.format(msg.get_str()))
-  return msg
+  def _send(self, msg):
+    logging.debug('tx: {}'.format(msg.get_str()))
+    self._ser.write(msg.get_bytes())
+
+  def _receive(self, timeout = None):
+    self._ser.timeout = timeout
+    bytes_data = self._ser.read()
+
+    # return null on timeout
+    if not bytes_data:
+      return None
+
+    msg = Message.create_from_bytes(bytes_data)
+    logging.debug('rx: {}'.format(msg.get_str()))
+    return msg
+
+
+class ExitHandler:
+
+  def __init__(self):
+    self._exit = False
+    signal.signal(signal.SIGINT, self._set_exit)
+    signal.signal(signal.SIGTERM, self._set_exit)
+    signal.signal(signal.SIGABRT, self._set_exit)
+
+  def _set_exit(self, signum, frame):
+    self._exit = True
+
+  def exit(self):
+    return self._exit
+
 
 if __name__ == '__main__':
   main()

@@ -9,9 +9,12 @@ REQUEST = 0x2
 ser = serial.Serial('COM4', 115200, timeout=1)
 
 while True:
-  ser.write(bytes([REQUEST]))
-  recv = ser.read()
-  if recv:
-    print(recv)
-    ser.write(bytes([SUCCESS]))
-  time.sleep(5)
+  try:
+    ser.write(bytes([REQUEST]))
+    recv = ser.read()
+    if recv:
+      print(recv)
+      ser.write(bytes([SUCCESS]))
+    time.sleep(5)
+  except KeyboardInterrupt:
+    break
