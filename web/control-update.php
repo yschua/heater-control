@@ -39,7 +39,7 @@
   }
 
   if ($operation == "o") {
-    if ($value >= 0) {
+    if ($value >= 0 && $db->GetSelectedPower() != 0) {
       $db->SetTimeout($value);
     }
   }
