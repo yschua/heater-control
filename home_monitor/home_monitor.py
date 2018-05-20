@@ -98,41 +98,29 @@ class GatewayServer(threading.Thread):
   def _get_message(self):
     msg = Message()
 
-    # turn off on timeout
-    if self._db.check_timeout():
-      msg.power_toggle()
-      return msg
+    c = self._db.get_controls()
 
-    selected_power = self._db.get_selected_power()
-    current_power = self._db.get_current_power()
-    selected_temp = self._db.get_selected_temp()
-    current_temp = self._db.get_current_temp()
-
-    if selected_power != current_power:
+    if c.selected_power != c.current_power:
       msg.power_toggle()
 
       # ignore temperature change on power off
-      if selected_power == 0:
+      if c.selected_power == 0:
         return msg
 
-    if selected_temp != current_temp:
-      delta = selected_temp - current_temp
+    if c.selected_temperature != c.current_temperature:
+      delta = c.selected_temperature - c.current_temperature
       msg.temp_delta(delta * 2)
 
     return msg
 
   def _update_current_control(self):
-    if self._db.check_timeout():
-      self._db.clear_timeout()
-      self._db.set_selected_power(0)
-
-    selected_power = self._db.get_selected_power()
-    current_power = self._db.get_current_power()
+    c = self._db.get_controls()
 
     # do not update temperature on power off
-    if not (selected_power == 0 and current_power == 1):
-      self._db.set_current_temp(self._db.get_selected_temp())
-    self._db.set_current_power(selected_power)
+    if not (c.selected_power == 0 and c.current_power == 1):
+      self._db.set_control('current_temperature', c.selected_temperature)
+
+    self._db.set_control('current_power', c.selected_power)
 
   def _send(self, msg):
     logging.debug('tx: {}'.format(msg.get_str()))

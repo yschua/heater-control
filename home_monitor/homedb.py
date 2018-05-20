@@ -1,62 +1,40 @@
 import sqlite3
+import collections
 
 class HomeDb:
 
   def __init__(self, path, logging):
     self._conn = sqlite3.connect(path)
     self._conn.row_factory = sqlite3.Row
+    self._conn.set_trace_callback(logging.debug)
     self._cursor = self._conn.cursor()
-    self._logging = logging
 
-  def _get_field(self, field):
-    sql = 'SELECT {} FROM heater WHERE heater_id = 1'.format(field)
-    #self._logging.info(sql)
-    self._cursor.execute(sql)
-    return self._cursor.fetchone()[0]
+  def get_controls(self):
+    self._cursor.execute('SELECT * FROM heater WHERE heater_id = 1')
+    all_values = self._cursor.fetchone()
+    readable_fields = [
+      'selected_power',
+      'current_power',
+      'selected_temperature',
+      'current_temperature']
+    readable_values = [all_values[f] for f in readable_fields]
+    return collections.namedtuple('Control', readable_fields)._make(readable_values)
 
-  def get_selected_power(self):
-    return self._get_field('selected_power')
-
-  def get_current_power(self):
-    return self._get_field('current_power')
-
-  def get_selected_temp(self):
-    return self._get_field('selected_temperature')
-
-  def get_current_temp(self):
-    return self._get_field('current_temperature')
-
-  def _set_field(self, field, value):
-    if self._get_field(field) == value:
-      return
-
-    sql = 'UPDATE heater SET {} = {} WHERE heater_id = 1'.format(field, value)
-    self._logging.info(sql)
-    self._cursor.execute(sql)
-    self._conn.commit()
-
-  def set_selected_power(self, value):
-    self._set_field('selected_power', value)
-
-  def set_current_power(self, value):
-    self._set_field('current_power', value)
-
-  def set_selected_temp(self, value):
-    self._set_field('selected_temperature', value)
-
-  def set_current_temp(self, value):
-    self._set_field('current_temperature', value)
+  def set_control(self, field, value):
+    self._cursor.execute('SELECT {} FROM heater WHERE heater_id = 1'.format(field))
+    if self._cursor.fetchone()[0] != value:
+      self._cursor.execute('UPDATE heater SET {} = ? WHERE heater_id = 1'.format(field), (value,))
+      self._conn.commit()
 
   def _get_current_datetime(self):
-    sql = 'SELECT datetime(\'now\', \'localtime\')';
-    self._cursor.execute(sql)
+    self._cursor.execute('SELECT datetime(\'now\', \'localtime\')')
     return self._cursor.fetchone()[0]
 
-  def check_timeout(self):
-    timeout = self._get_field('timeout')
-    if not timeout:
-      return False
-    return (self._get_current_datetime() > timeout)
+  # def check_timeout(self):
+  #   timeout = self._get_control('timeout')
+  #   if not timeout:
+  #     return False
+  #   return (self._get_current_datetime() > timeout)
 
   def clear_timeout(self):
     self._set_field('timeout', 'NULL');
