@@ -38,16 +38,18 @@ def main():
   exit_handler = ExitHandler()
 
   # initialise threads
-  gateway_server = GatewayServer()
-  gateway_server.start()
+  threads = [GatewayServer(), Scheduler()]
+  for thread in threads:
+    thread.start()
 
   while not exit_handler.exit():
     time.sleep(1)
 
   # stop threads
   logging.debug('stopping threads')
-  gateway_server.stop()
-  gateway_server.join()
+  for thread in threads:
+    thread.stop()
+    thread.join()
 
   logging.info('ended')
 
@@ -84,6 +86,7 @@ class GatewayServer(threading.Thread):
         continue
 
       self._send(msg_send)
+
       msg_recv = self._receive(1) # will have to play around with this timeout
 
       if msg_recv and msg_recv.get() == SUCCESS:
@@ -137,6 +140,36 @@ class GatewayServer(threading.Thread):
     msg = Message.create_from_bytes(bytes_data)
     logging.debug('rx: {}'.format(msg.get_str()))
     return msg
+
+
+class Scheduler(threading.Thread):
+
+  def __init__(self):
+    threading.Thread.__init__(self)
+    self.name = 'Scheduler'
+    self._stop_event = threading.Event()
+
+  def stop(self):
+    self._stop_event.set()
+
+  def run(self):
+    logging.debug('started')
+
+    self._db = HomeDb(DB_PATH, logging)
+
+    while not self._stop_event.is_set():
+      now = self._db.get_datetime_now()
+
+      # turn off heater when timeout is reached
+      timeout = self._db.get_datetime_timeout()
+      if timeout and timeout < now:
+        logging.info('Timeout reached, turning off heater')
+	self._db.set_control('selected_power', 0)
+        self._db.set_control('timeout', None)
+
+      time.sleep(1)
+
+    logging.debug('ended')
 
 
 class ExitHandler:
