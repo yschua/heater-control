@@ -78,6 +78,7 @@
 
     function SetTimeout($timeout)
     {
+      // TODO store in UTC or unix time instead of local time
       $datetime = ($timeout > 0) 
         ? sprintf("datetime('now', 'localtime', '+%d minutes')", $timeout)
         : "NULL";
