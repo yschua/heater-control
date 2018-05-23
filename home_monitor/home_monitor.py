@@ -4,6 +4,7 @@ import logging
 import threading
 import signal
 import sys
+import datetime
 from homedb import HomeDb
 from message import Message
 
@@ -81,8 +82,8 @@ class GatewayServer(threading.Thread):
 
       msg_send = self._get_message()
 
-      # Issue #11: reply with null message or silence?
       if msg_send.get() == 0x0:
+        # Issue #11: reply with null message or silence?
         continue
 
       self._send(msg_send)
@@ -100,30 +101,32 @@ class GatewayServer(threading.Thread):
 
   def _get_message(self):
     msg = Message()
+    ctl = self._db.get_controls()
 
-    c = self._db.get_controls()
-
-    if c.selected_power != c.current_power:
+    if ctl.selected_power != ctl.current_power:
       msg.power_toggle()
 
-      # ignore temperature change on power off
-      if c.selected_power == 0:
+      if ctl.selected_power == 0:
+        # ignore temperature change on power off
         return msg
 
-    if c.selected_temperature != c.current_temperature:
-      delta = c.selected_temperature - c.current_temperature
+    if ctl.selected_temperature != ctl.current_temperature:
+      delta = ctl.selected_temperature - ctl.current_temperature
       msg.temp_delta(delta * 2)
 
     return msg
 
   def _update_current_control(self):
-    c = self._db.get_controls()
+    # current controls should only be updated here
+    ctl = self._db.get_controls()
 
-    # do not update temperature on power off
-    if not (c.selected_power == 0 and c.current_power == 1):
-      self._db.set_control('current_temperature', c.selected_temperature)
+    if not (ctl.selected_power == 0 and ctl.current_power == 1):
+      # do not update temperature on power off
+      self._db.set_control('current_temperature', ctl.selected_temperature)
 
-    self._db.set_control('current_power', c.selected_power)
+    self._db.set_control('current_power', ctl.selected_power)
+
+    self._db.commit()
 
   def _send(self, msg):
     logging.debug('tx: {}'.format(msg.get_str()))
@@ -143,6 +146,10 @@ class GatewayServer(threading.Thread):
 
 
 class Scheduler(threading.Thread):
+  # Only one schedule is allowed to be active at any time, this means overlapping
+  # schedules are ignored. Don't create overlapping schedules!
+  # On any change of control values by a user, except the temperature, any active
+  # schedule will be deactivated
 
   def __init__(self):
     threading.Thread.__init__(self)
@@ -158,18 +165,71 @@ class Scheduler(threading.Thread):
     self._db = HomeDb(DB_PATH, logging)
 
     while not self._stop_event.is_set():
-      now = self._db.get_datetime_now()
+      self._now = self._db.get_datetime_now()
+      ctl = self._db.get_controls()
+      schedules = self._db.get_schedule_array()
+      running_schedule = self._get_running_schedule(schedules)
 
-      # turn off heater when timeout is reached
-      timeout = self._db.get_datetime_timeout()
-      if timeout and timeout < now:
-        logging.info('Timeout reached, turning off heater')
-	self._db.set_control('selected_power', 0)
+      if running_schedule:
+        # paranoia check if this schedule is suppose to be running
+        start = self._get_datetime_today(running_schedule.start_time)
+        end = self._get_datetime_today(running_schedule.end_time)
+        if (self._now < start or
+            self._now > end or
+            ctl.selected_power == 0 or
+            ctl.timeout != end):
+          logging.warning('Unexpected schedule, stopping {}'.format(running_schedule))
+          running_schedule.active = False
+          self._db.update_schedule(running_schedule)
+          self._db.commit()
+
+      if ctl.timeout and ctl.timeout < self._now:
+        # turn off heater when timeout is reached
+        if running_schedule:
+          logging.info('Stopping {}'.format(running_schedule))
+          running_schedule.active = False
+          self._db.update_schedule(running_schedule)
+        else:
+          logging.info('Timeout reached, turning off heater')
+        self._db.set_control('selected_power', 0)
         self._db.set_control('timeout', None)
+        self._db.commit()
+
+      if running_schedule is None and ctl.selected_power == 0:
+        # check for new schedules to start
+        new_schedule = self._get_new_schedule(schedules)
+        if new_schedule:
+          logging.info('Starting {}'.format(new_schedule))
+          self._db.set_control('selected_power', 1)
+          end = self._get_datetime_today(new_schedule.end_time)
+          self._db.set_control('timeout', end)
+          new_schedule.active = True
+          self._db.update_schedule(new_schedule)
+          self._db.commit()
 
       time.sleep(1)
 
     logging.debug('ended')
+
+  def _get_running_schedule(self, schedules):
+    for schedule in schedules:
+      if schedule.active:
+        return schedule
+    return None
+
+  def _get_new_schedule(self, schedules):
+    for schedule in schedules:
+      if schedule.enable and not schedule.active:
+        dop = 1 << self._now.date().weekday()
+        if (dop & schedule.dop) != 0:
+          start = self._get_datetime_today(schedule.start_time)
+          delta_seconds = (self._now - start).total_seconds()
+          if 0 <= delta_seconds < 5:
+            return schedule
+    return None
+
+  def _get_datetime_today(self, time):
+    return datetime.datetime.combine(self._now.date(), time)
 
 
 class ExitHandler:
