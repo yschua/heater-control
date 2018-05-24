@@ -101,16 +101,12 @@ class GatewayServer(threading.Thread):
 
   def _get_message(self):
     msg = Message()
-    ctl = self._db.get_controls()
+    ctl = self._db.get_control()
 
     if ctl.selected_power != ctl.current_power:
       msg.power_toggle()
 
-      if ctl.selected_power == 0:
-        # ignore temperature change on power off
-        return msg
-
-    if ctl.selected_temperature != ctl.current_temperature:
+    if ctl.selected_power and ctl.selected_temperature != ctl.current_temperature:
       delta = ctl.selected_temperature - ctl.current_temperature
       msg.temp_delta(delta * 2)
 
@@ -118,14 +114,13 @@ class GatewayServer(threading.Thread):
 
   def _update_current_control(self):
     # current controls should only be updated here
-    ctl = self._db.get_controls()
+    ctl = self._db.get_control()
 
-    if not (ctl.selected_power == 0 and ctl.current_power == 1):
-      # do not update temperature on power off
-      self._db.set_control('current_temperature', ctl.selected_temperature)
+    if ctl.selected_power:
+      ctl.current_temperature = ctl.selected_temperature
+    ctl.current_power = ctl.selected_power
 
-    self._db.set_control('current_power', ctl.selected_power)
-
+    self._db.update_control(ctl)
     self._db.commit()
 
   def _send(self, msg):
@@ -166,7 +161,7 @@ class Scheduler(threading.Thread):
 
     while not self._stop_event.is_set():
       self._now = self._db.get_datetime_now()
-      ctl = self._db.get_controls()
+      ctl = self._db.get_control()
       schedules = self._db.get_schedule_array()
       running_schedule = self._get_running_schedule(schedules)
 
@@ -178,35 +173,35 @@ class Scheduler(threading.Thread):
             self._now > end or
             ctl.selected_power == 0 or
             ctl.timeout != end):
-          logging.warning('Unexpected schedule, stopping {}'.format(running_schedule))
+          logging.warning('Unexpected state, stopping {}'.format(running_schedule))
           running_schedule.active = False
           self._db.update_schedule(running_schedule)
-          self._db.commit()
 
       if ctl.timeout and ctl.timeout < self._now:
         # turn off heater when timeout is reached
-        if running_schedule:
+        if running_schedule and running_schedule.active:
           logging.info('Stopping {}'.format(running_schedule))
           running_schedule.active = False
           self._db.update_schedule(running_schedule)
         else:
           logging.info('Timeout reached, turning off heater')
-        self._db.set_control('selected_power', 0)
-        self._db.set_control('timeout', None)
-        self._db.commit()
+        ctl.selected_power = False
+        ctl.timeout = None
+        self._db.update_control(ctl)
 
-      if running_schedule is None and ctl.selected_power == 0:
+      if ((running_schedule is None or not running_schedule.active) and
+          ctl.selected_power == 0):
         # check for new schedules to start
         new_schedule = self._get_new_schedule(schedules)
         if new_schedule:
           logging.info('Starting {}'.format(new_schedule))
-          self._db.set_control('selected_power', 1)
-          end = self._get_datetime_today(new_schedule.end_time)
-          self._db.set_control('timeout', end)
+          ctl.selected_power = True
+          ctl.timeout = self._get_datetime_today(new_schedule.end_time)
+          self._db.update_control(ctl)
           new_schedule.active = True
           self._db.update_schedule(new_schedule)
-          self._db.commit()
 
+      self._db.commit()
       time.sleep(1)
 
     logging.debug('ended')
