@@ -1,5 +1,6 @@
 import serial
 import time
+import struct
 
 SUCCESS = 0x0
 FAILED = 0x1
@@ -13,7 +14,12 @@ while True:
     ser.write(bytes([REQUEST]))
     recv = ser.read()
     if recv:
-      print(recv)
+      msg = struct.unpack('B', recv)[0]
+      toggle = (msg & 0x1) == 0x1
+      delta = (msg >> 1) & 0x3f
+      if (msg & 0x80) != 0x0:
+        delta *= -1
+      print('toggle: {}, delta: {}'.format(toggle, delta))
       ser.write(bytes([SUCCESS]))
     time.sleep(5)
   except KeyboardInterrupt:
