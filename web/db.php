@@ -142,6 +142,13 @@
       $stmt->bindValue(2, $key, SQLITE3_INTEGER);
       $stmt->execute();
     }
+
+    function GetActiveSchedule()
+    {
+      $stmt = $this->db->prepare("SELECT * FROM schedule WHERE is_active = 1");
+      $result = $stmt->execute();
+      return $result->fetchArray(SQLITE3_ASSOC);
+    }
   }
 
   $db = new Db("../db/home.db");

@@ -5,6 +5,21 @@
 
 <div class="container">
 
+  <div class="active-schedule text-success">
+      <?php
+        $activeSchedule = $db->GetActiveSchedule();
+          if (!empty($activeSchedule)) {
+          $days = $db->GetDayArray();
+          printf(
+            "Scheduled Run<br> %s %s-%s",
+            $days[$activeSchedule["day_id"]]["name"],
+            $activeSchedule["start_time"],
+            $activeSchedule["end_time"]
+          );
+        }
+      ?>
+  </div>
+
   <!-- Power control -->
   <div class="control-item">
     <div class="control-label">Power</div>
