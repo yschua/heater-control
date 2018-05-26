@@ -8,6 +8,7 @@
     function __construct($filename)
     {
       $this->db = new SQLite3($filename);
+      $this->db->busyTimeout(5000);
       $this->controls = $this->StoreControls();
       $this->days = $this->StoreDays();
     }
@@ -79,7 +80,7 @@
     function SetTimeout($timeout)
     {
       // TODO store in UTC or unix time instead of local time
-      $datetime = ($timeout > 0) 
+      $datetime = ($timeout > 0)
         ? sprintf("datetime('now', 'localtime', '+%d minutes')", $timeout)
         : "NULL";
       $this->SetControl("timeout", $datetime);
@@ -124,8 +125,7 @@
       $ret = array();
       while ($day = $result->fetchArray(SQLITE3_ASSOC)) {
         $key = $day["day_id"];
-        $name = $day["name"];
-        $ret[$key] = $name;
+        $ret[$key] = array("name" => $day["name"], "dop" => $day["dop"]);
       }
       return $ret;
     }
@@ -144,5 +144,5 @@
     }
   }
 
-  $db = new DB("../db/home.db");
+  $db = new Db("../db/home.db");
 ?>

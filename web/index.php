@@ -56,6 +56,7 @@
 
   <hr>
 
+  <!-- Schedules -->
   <table class="table table-schedule">
     <thead>
       <tr>
@@ -70,6 +71,7 @@
       <!-- List schedules -->
       <?php
         foreach ($db->GetScheduleArray() as $schedule) {
+          $key = $schedule["day_id"];
           printf(
             "<tr>
               <td><input class=\"enable-schedule\" id=\"%s\" type=\"checkbox\" data-toggle=\"toggle\" data-size=\"mini\" %s></td>
@@ -80,7 +82,7 @@
              </tr>",
             $schedule["schedule_id"],
             $schedule["is_enable"] == 1 ? "checked" : "",
-            $db->GetDayArray()[$schedule["day_id"]],
+            $db->GetDayArray()[$key]["name"],
             $schedule["start_time"],
             $schedule["end_time"],
             $schedule["schedule_id"]
@@ -94,10 +96,9 @@
           <select class="form-control" id="scheduleDays">
             <?php
               $days = $db->GetDayArray();
-              while ($name = current($days)) {
-                $key = key($days);
-                next($days);
-                printf("<option id=\"%d\">%s</option>", $key, $name);
+              $keys = array_keys($days);
+              foreach (array_combine($keys, $days) as $key => $day) {
+                printf("<option id=\"%d\">%s</option>", $key, $day["name"]);
               }
             ?>
           </select>
@@ -125,13 +126,13 @@
   require "footer.php";
 ?>
 
-<!-- TODO reload on page active -->
 <script type="text/javascript" src="bootstrap/js/bootstrap-clockpicker.min.js"></script>
 <script type="text/javascript" src="bootstrap/js/bootstrap-toggle.min.js"></script>
 <script type="text/javascript">
   // Clockpicker
   $(".clockpicker").clockpicker({
-    autoclose: true
+    autoclose: true,
+    placement: 'top'
   });
 
   var fnReload = function() { location.reload(); };
@@ -160,14 +161,23 @@
         return;
       }
 
-      var url = "schedule-update.php";
-      var data = {
-        "action": "add",
-        "dayKey": dayKey,
-        "start": start,
-        "end": end
-      };
-      $.post(url, data, fnReload);
+      $.ajax({
+        url: "schedule-update.php",
+        data: {
+          "action": "add",
+          "dayKey": dayKey,
+          "start": start,
+          "end": end
+        },
+        type: "POST",
+        dataType: "json"
+      }).done(function(valid) {
+        if (valid) {
+          fnReload();
+        } else {
+          alert("Times overlap with an existing schedule.");
+        }
+      });
     });
   });
 
@@ -199,8 +209,7 @@
   });
 
   // Refresh on active
-  var blurred = false;
-  window.onblur = function() { blurred = true; };
-  window.onfocus = function() { blurred && (location.reload()); };
-
+  // var blurred = false;
+  // window.onblur = function() { blurred = true; };
+  // window.onfocus = function() { blurred && (location.reload()); };
 </script>
