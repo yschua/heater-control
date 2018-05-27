@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS `schedule` (
 	`end_time`	TEXT NOT NULL,
 	`mode`	TEXT,
 	`is_enable`	INTEGER NOT NULL DEFAULT 1,
+	`is_active`	INTEGER NOT NULL DEFAULT 0,
 	FOREIGN KEY(`day_id`) REFERENCES `day`(`day_id`)
 );
 DROP TABLE IF EXISTS `heater`;
