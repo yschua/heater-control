@@ -31,7 +31,7 @@ SERIAL_BAUD = 115200
 def main():
   logging.basicConfig(
     filename=LOG_PATH,
-    level=logging.DEBUG, # TODO set this with command line argument
+    level=logging.INFO, # TODO set this with command line argument
     format='[%(asctime)s] (%(thread)d) %(threadName)s: %(message)s')
 
   logging.info('started')
@@ -170,7 +170,7 @@ class Scheduler(threading.Thread):
         start = self._get_datetime_today(running_schedule.start_time)
         end = self._get_datetime_today(running_schedule.end_time)
         if (self._now < start or
-            self._now > end or
+            (self._now - end).total_seconds() > 5 or
             ctl.selected_power == 0 or
             ctl.timeout != end):
           logging.warning('Unexpected state, stopping {}'.format(running_schedule))

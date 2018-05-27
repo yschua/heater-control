@@ -149,6 +149,12 @@
       $result = $stmt->execute();
       return $result->fetchArray(SQLITE3_ASSOC);
     }
+
+    function DeactivateSchedule()
+    {
+      $stmt = $this->db->prepare("UPDATE schedule SET is_active = 0");
+      $stmt->execute();
+    }
   }
 
   $db = new Db("../db/home.db");

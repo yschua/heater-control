@@ -17,15 +17,20 @@
   $value = doubleval($message[1]);
 
   if (strtolower($operation) == "p") {
+    $currSelectedPower = $db->GetSelectedPower();
     if ($value == 0 || $value == 1) {
       $db->SetSelectedPower($value);
       if ($operation == "P") { // calibrate message
         $db->SetCurrentPower($value);
       }
-      if ($value == 0) { // on power off
-        $db->SetTimeout(0);
-      } else if ($db->GetSelectedPower() != 1) { // always default to a timeout value
-        $db->SetTimeout(DEFAULT_TIMEOUT);
+      if ($value != $currSelectedPower)
+      {
+        if ($value == 0) { // on power off
+          $db->SetTimeout(0);
+        } else { // on power on
+          $db->SetTimeout(DEFAULT_TIMEOUT); // always default to a timeout value
+        }
+        $db->DeactivateSchedule();
       }
     }
   }
@@ -41,6 +46,7 @@
   if ($operation == "o") {
     if ($value >= 0 && $db->GetSelectedPower() != 0) {
       $db->SetTimeout($value);
+      $db->DeactivateSchedule();
     }
   }
 ?>
