@@ -11,7 +11,7 @@
           if (!empty($activeSchedule)) {
           $days = $db->GetDayArray();
           printf(
-            "Scheduled Run<br> %s %s-%s",
+            "Scheduled <span class=\"glyphicon glyphicon-fire\"></span><br>%s %s-%s",
             $days[$activeSchedule["day_id"]]["name"],
             $activeSchedule["start_time"],
             $activeSchedule["end_time"]
