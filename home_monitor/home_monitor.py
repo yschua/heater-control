@@ -13,8 +13,8 @@ OS = 'Windows'
 
 if OS == 'Unix':
   PORT = '/dev/ttyUSB0'
-  DB_PATH = '../db/home.db'
-  LOG_PATH = 'monitor.log'
+  DB_PATH = '/var/git/heater-control/db/home.db'
+  LOG_PATH = '/var/git/heater-control/home_monitor/monitor.log'
 elif OS == 'Windows':
   PORT = 'COM3'
   DB_PATH = '../db/home.db'
