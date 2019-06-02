@@ -166,20 +166,42 @@ class Scheduler(threading.Thread):
       schedules = self._db.get_schedule_array()
       running_schedule = self._get_running_schedule(schedules)
 
-      # paranoia check if this schedule is suppose to be running
-      if running_schedule:
-        start = self._get_datetime_today(running_schedule.start_time)
-        end = self._get_datetime_today(running_schedule.end_time)
-        if (self._now < start or
-            (self._now - end).total_seconds() > 5 or
-            ctl.is_on == False or
-            ctl.timeout != end):
-          logging.warning('Unexpected state, stopping {}'.format(running_schedule))
-          running_schedule.active = False
-          self._db.update_schedule(running_schedule)
+      ctl, running_schedule = self._stop_rogue_schedule(ctl, running_schedule)
+      ctl, running_schedule = self._stop_on_timeout(ctl, running_schedule)
+      ctl, running_schedule = self._start_new_schedule(ctl, running_schedule, schedules)
 
-      # turn off heater when timeout is reached
-      if ctl.timeout and ctl.timeout < self._now:
+      if ctl.is_on != ctl.selected_power:
+        ctl.selected_power = ctl.is_on
+        ctl.modified = True
+
+      # these functions only commit if there are changes
+      self._db.running_schedule.modified(ctl)
+      self._db.commit()
+
+      time.sleep(1)
+
+    logging.debug('ended')
+
+  def _stop_rogue_schedule(self, ctl, running_schedule):
+    if running_schedule is None:
+      return ctl, None
+
+    start = self._get_datetime_today(running_schedule.start_time)
+    end = self._get_datetime_today(running_schedule.end_time)
+    endElapsed = self._now - end
+
+    if (self._now < start or
+        endElapsed.total_seconds() > 5 or
+        ctl.is_on == False or
+        ctl.timeout != end):
+      logging.warning('Unexpected state, stopping {}'.format(running_schedule))
+      running_schedule.active = False
+      self._db.update_schedule(running_schedule)
+
+    return ctl, running_schedule
+
+  def _stop_on_timeout(self, ctl, running_schedule):
+    if ctl.timeout and ctl.timeout < self._now:
         if running_schedule and running_schedule.active:
           logging.info('Stopping {}'.format(running_schedule))
           running_schedule.active = False
@@ -190,29 +212,21 @@ class Scheduler(threading.Thread):
         ctl.timeout = None
         ctl.modified = True
 
-      # check for new schedules to start
-      if ((running_schedule is None or not running_schedule.active) and
-          ctl.is_on == False):
-        new_schedule = self._get_new_schedule(schedules)
-        if new_schedule:
-          logging.info('Starting {}'.format(new_schedule))
-          ctl.is_on = True
-          ctl.timeout = self._get_datetime_today(new_schedule.end_time)
-          ctl.modified = True
-          new_schedule.active = True
-          self._db.update_schedule(new_schedule)
+    return ctl, running_schedule
 
-      if ctl.is_on != ctl.selected_power:
-        ctl.selected_power = ctl.is_on
+  def _start_new_schedule(self, ctl, running_schedule, schedules):
+    if ((running_schedule is None or not running_schedule.active) and
+        ctl.is_on == False):
+      new_schedule = self._get_new_schedule(schedules)
+      if new_schedule:
+        logging.info('Starting {}'.format(new_schedule))
+        ctl.is_on = True
+        ctl.timeout = self._get_datetime_today(new_schedule.end_time)
         ctl.modified = True
+        new_schedule.active = True
+        self._db.update_schedule(new_schedule)
 
-      # these functions only commit if there are changes
-      self._db.update_control(ctl)
-      self._db.commit()
-
-      time.sleep(1)
-
-    logging.debug('ended')
+    return ctl, running_schedule
 
   def _get_running_schedule(self, schedules):
     for schedule in schedules:
