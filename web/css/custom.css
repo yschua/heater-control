@@ -18,9 +18,9 @@
 .control-item {
   padding-top: 2px;
   padding-bottom: 2px;
-  width: 260px;
   margin-left: 0px;
   margin-right: auto;
+  height: 50px;
 }
 
 .control-label {
@@ -35,6 +35,7 @@
 .control-input {
   display: inline-block;
   width: 110px;
+  height: 100%;
 }
 
 .control-input > .dropdown-toggle {
