@@ -119,6 +119,7 @@ class GatewayServer(threading.Thread):
     if ctl.selected_power:
       ctl.current_temperature = ctl.selected_temperature
     ctl.current_power = ctl.selected_power
+    ctl.modified = True
 
     self._db.update_control(ctl)
     self._db.commit()
