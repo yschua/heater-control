@@ -17,12 +17,10 @@ CREATE TABLE IF NOT EXISTS `heater` (
 	`current_power`	INTEGER,
 	`selected_temperature`	REAL,
 	`current_temperature`	REAL,
-	`is_active`	INTEGER,
 	`timeout`	TEXT,
-	`mode`	TEXT,
 	PRIMARY KEY(`heater_id`)
 );
-INSERT INTO `heater` (heater_id,selected_power,current_power,selected_temperature,current_temperature,is_active,timeout,mode) VALUES (1,0,0,15.0,15.0,0,NULL,NULL);
+INSERT INTO `heater` (heater_id,selected_power,current_power,selected_temperature,current_temperature,timeout) VALUES (1,0,0,15.0,15.0,NULL);
 DROP TABLE IF EXISTS `day`;
 CREATE TABLE IF NOT EXISTS `day` (
 	`day_id`	INTEGER NOT NULL,
