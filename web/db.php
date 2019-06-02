@@ -214,6 +214,12 @@
       $stmt->bindValue(1, $value, SQLITE3_INTEGER);
       $stmt->execute();
     }
+
+    function ClearLastCycle()
+    {
+      $stmt = $this->db->prepare("UPDATE on_off_cycle SET last_cycle = NULL");
+      $stmt->execute();
+    }
   }
 
   $db = new Db("../db/home.db");

@@ -168,14 +168,11 @@ class Scheduler(threading.Thread):
 
       ctl, running_schedule = self._stop_rogue_schedule(ctl, running_schedule)
       ctl, running_schedule = self._stop_on_timeout(ctl, running_schedule)
-      ctl, running_schedule = self._start_new_schedule(ctl, running_schedule, schedules)
-
-      if ctl.is_on != ctl.selected_power:
-        ctl.selected_power = ctl.is_on
-        ctl.modified = True
+      ctl = self._start_new_schedule(ctl, running_schedule, schedules)
+      ctl = self._handle_selected_power(ctl, running_schedule)
 
       # these functions only commit if there are changes
-      self._db.running_schedule.modified(ctl)
+      self._db.update_control(ctl)
       self._db.commit()
 
       time.sleep(1)
@@ -220,13 +217,47 @@ class Scheduler(threading.Thread):
       new_schedule = self._get_new_schedule(schedules)
       if new_schedule:
         logging.info('Starting {}'.format(new_schedule))
-        ctl.is_on = True
+        ctl.is_on = ctl.selected_power = True
         ctl.timeout = self._get_datetime_today(new_schedule.end_time)
         ctl.modified = True
         new_schedule.active = True
         self._db.update_schedule(new_schedule)
 
-    return ctl, running_schedule
+    return ctl
+
+  @staticmethod
+  def _set_selected_power_from_is_on(ctl):
+    if ctl.is_on != ctl.selected_power:
+      ctl.selected_power = ctl.is_on
+      ctl.modified = True
+    return ctl
+
+  def _handle_selected_power(self, ctl, running_schedule):
+      on_off_cycle = self._db.get_on_off_cycle()
+
+      # if not dealing with on-off cycle
+      if not ctl.is_on or not on_off_cycle.is_active:
+        if on_off_cycle.last_cycle:
+          on_off_cycle.set_last_cycle(None)
+          self._db.update_on_off_cycle(on_off_cycle)
+        ctl = self._set_selected_power_from_is_on(ctl)
+        return ctl
+
+      datetime_now = datetime.datetime.now()
+
+      if on_off_cycle.last_cycle is None:
+        on_off_cycle.set_last_cycle(datetime_now)
+
+      if datetime_now > on_off_cycle.get_cycle_end(ctl.selected_power):
+        logging.info('{} cycle end. Turning {}.'.format(
+          "On" if ctl.selected_power else "Off",
+          "off" if ctl.selected_power else "on"))
+        ctl.selected_power = not ctl.selected_power
+        ctl.modified = True
+        on_off_cycle.set_last_cycle(datetime_now)
+
+      self._db.update_on_off_cycle(on_off_cycle)
+      return ctl
 
   def _get_running_schedule(self, schedules):
     for schedule in schedules:
