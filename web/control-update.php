@@ -1,7 +1,7 @@
 <?php
   include "db.php";
 
-  const DEFAULT_TIMEOUT = 1;
+  const DEFAULT_TIMEOUT = 20;
   const MIN_TEMP = 10.0;
   const MAX_TEMP = 20.0;
 
