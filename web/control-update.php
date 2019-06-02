@@ -20,8 +20,9 @@
     $isOn = $db->GetIsOn();
     if ($value == 0 || $value == 1) {
       $db->SetIsOn($value);
-      $db->SetSelectedPower($value);
-      $db->ClearLastCycle();
+      if ($db->SetSelectedPower($value)) {
+        $db->ClearLastCycle();
+      }
       if ($operation == "P") { // calibrate message
         $db->SetCurrentPower($value);
       }
