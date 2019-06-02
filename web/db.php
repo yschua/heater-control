@@ -61,7 +61,9 @@
     {
       if ($value != $this->GetSelectedPower()) {
         $this->SetControl("selected_power", $value);
+        return true;
       }
+      return false;
     }
 
     function SetIsOn($value)
