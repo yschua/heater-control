@@ -60,11 +60,12 @@
       </button>
       <ul class="dropdown-menu">
         <li><a href="#o-0" class="btn-input">Off</a></li>
-        <li><a href="#o-15" class="btn-input">15 min</a></li>
-        <li><a href="#o-30" class="btn-input">30 min</a></li>
-        <li><a href="#o-45" class="btn-input">45 min</a></li>
+        <li><a href="#o-20" class="btn-input">20 min</a></li>
+        <li><a href="#o-40" class="btn-input">40 min</a></li>
         <li><a href="#o-60" class="btn-input">60 min</a></li>
+        <li><a href="#o-90" class="btn-input">90 min</a></li>
         <li><a href="#o-120" class="btn-input">120 min</a></li>
+        <li><a href="#o-240" class="btn-input">240 min</a></li>
       </ul>
     </div>
   </div>
@@ -83,7 +84,7 @@
   <?php
     function DurationOptions($selected)
     {
-      for ($min = 0; $min <= 30; $min += 5) {
+      for ($min = 5; $min <= 40; $min += 5) {
         if ($selected == $min) {
           printf("<option id=\"%d\" selected>%d min</option>", $min, $min);
         } else {
@@ -162,13 +163,13 @@
         </td>
         <td>
           <div class="input-group clockpicker">
-            <input type="text" class="form-control" value="09:30" id="scheduleStart" readonly>
+            <input type="text" class="form-control" value="08:00" id="scheduleStart" readonly>
             <span class="input-group-addon no-indent"><span class="glyphicon glyphicon-time"></span></span>
           </div>
         </td>
         <td>
           <div class="input-group clockpicker">
-            <input type="text" class="form-control" value="10:00" id="scheduleEnd" readonly>
+            <input type="text" class="form-control" value="08:30" id="scheduleEnd" readonly>
             <span class="input-group-addon no-indent"><span class="glyphicon glyphicon-time"></span></span>
           </div>
         </td>
