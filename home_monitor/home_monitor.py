@@ -165,43 +165,50 @@ class Scheduler(threading.Thread):
       schedules = self._db.get_schedule_array()
       running_schedule = self._get_running_schedule(schedules)
 
+      # paranoia check if this schedule is suppose to be running
       if running_schedule:
-        # paranoia check if this schedule is suppose to be running
         start = self._get_datetime_today(running_schedule.start_time)
         end = self._get_datetime_today(running_schedule.end_time)
         if (self._now < start or
             (self._now - end).total_seconds() > 5 or
-            ctl.selected_power == 0 or
+            ctl.is_on == False or
             ctl.timeout != end):
           logging.warning('Unexpected state, stopping {}'.format(running_schedule))
           running_schedule.active = False
           self._db.update_schedule(running_schedule)
 
+      # turn off heater when timeout is reached
       if ctl.timeout and ctl.timeout < self._now:
-        # turn off heater when timeout is reached
         if running_schedule and running_schedule.active:
           logging.info('Stopping {}'.format(running_schedule))
           running_schedule.active = False
           self._db.update_schedule(running_schedule)
         else:
           logging.info('Timeout reached, turning off heater')
-        ctl.selected_power = False
+        ctl.is_on = False
         ctl.timeout = None
-        self._db.update_control(ctl)
+        ctl.modified = True
 
+      # check for new schedules to start
       if ((running_schedule is None or not running_schedule.active) and
-          ctl.selected_power == 0):
-        # check for new schedules to start
+          ctl.is_on == False):
         new_schedule = self._get_new_schedule(schedules)
         if new_schedule:
           logging.info('Starting {}'.format(new_schedule))
-          ctl.selected_power = True
+          ctl.is_on = True
           ctl.timeout = self._get_datetime_today(new_schedule.end_time)
-          self._db.update_control(ctl)
+          ctl.modified = True
           new_schedule.active = True
           self._db.update_schedule(new_schedule)
 
+      if ctl.is_on != ctl.selected_power:
+        ctl.selected_power = ctl.is_on
+        ctl.modified = True
+
+      # these functions only commit if there are changes
+      self._db.update_control(ctl)
       self._db.commit()
+
       time.sleep(1)
 
     logging.debug('ended')

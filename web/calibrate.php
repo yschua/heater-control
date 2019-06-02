@@ -6,6 +6,7 @@
 <div class="container">
 
   <?php
+    printf("is_on: %d<br>", $db->GetIsOn());
     printf("current_power: %d<br>", $db->GetCurrentPower());
     printf("selected_power: %d<br>", $db->GetSelectedPower());
     printf("current_temperature: %.1f<br>", $db->GetCurrentTemperature());
@@ -15,8 +16,8 @@
   <h5>
     <div class="control-label">Heater</div>
     <div class="btn-group">
-      <a href="#P-1" class="btn btn-input btn-<?php echo $db->GetSelectedPower() ? "primary" : "default";?>">ON</a>
-      <a href="#P-0" class="btn btn-input btn-<?php echo !$db->GetSelectedPower() ? "primary" : "default";?>">OFF</a>
+      <a href="#P-1" class="btn btn-input btn-<?php echo $db->GetIsOn() ? "primary" : "default";?>">ON</a>
+      <a href="#P-0" class="btn btn-input btn-<?php echo !$db->GetIsOn() ? "primary" : "default";?>">OFF</a>
     </div>
   </h5>
 
