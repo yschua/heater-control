@@ -24,6 +24,7 @@
 
     function GetCurrentPower() { return $this->controls["current_power"]; }
     function GetSelectedPower() { return $this->controls["selected_power"]; }
+    function GetIsOn() { return $this->controls["is_on"]; }
 
     function GetCurrentTemperature() { return $this->controls["current_temperature"]; }
     function GetSelectedTemperature() { return $this->controls["selected_temperature"]; }
@@ -60,6 +61,13 @@
     {
       if ($value != $this->GetSelectedPower()) {
         $this->SetControl("selected_power", $value);
+      }
+    }
+
+    function SetIsOn($value)
+    {
+      if ($value != $this->GetIsOn()) {
+        $this->SetControl("is_on", $value);
       }
     }
 
