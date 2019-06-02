@@ -187,6 +187,13 @@
       return $result->fetchArray(SQLITE3_NUM)[0];
     }
 
+    function GetLastCycle()
+    {
+      $stmt = $this->db->prepare("SELECT last_cycle from on_off_cycle");
+      $result = $stmt->execute();
+      return $result->fetchArray(SQLITE3_NUM)[0];
+    }
+
     function SetCycleActive($value)
     {
       $stmt = $this->db->prepare("UPDATE on_off_cycle SET is_active = ?");
