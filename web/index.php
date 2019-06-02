@@ -55,7 +55,7 @@
   <div class="control-item">
     <div class="control-label">Timeout</div>
     <div class="control-input dropdown">
-      <button class="btn btn-lg btn-block btn-default dropdown-toggle" type="button" data-toggle="dropdown" <?php if (!$db->GetSelectedPower()) { echo "disabled"; }?>>
+      <button class="btn btn-lg btn-block btn-default dropdown-toggle" type="button" data-toggle="dropdown" <?php if (!$db->GetIsOn()) { echo "disabled"; }?>>
         <?php echo $db->GetTimeoutStr(); ?> <span class="caret" />
       </button>
       <ul class="dropdown-menu">
