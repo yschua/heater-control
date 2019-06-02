@@ -46,7 +46,7 @@
           <ul class="nav navbar-nav">
             <?php
               setNavBarTab("Control", "index.php");
-              setNavBarTab("Diagnostic", "calibrate.php");
+              setNavBarTab("Debug", "calibrate.php");
             ?>
           </ul>
         </div>

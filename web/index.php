@@ -24,8 +24,8 @@
   <div class="control-item">
     <div class="control-label">Power</div>
     <div class="btn-group control-input">
-      <a href="#p-1" class="btn btn-lg btn-input col-xs-6 btn-<?php echo $db->GetSelectedPower() ? "primary active" : "default";?>">On</a>
-      <a href="#p-0" class="btn btn-lg btn-input col-xs-6 btn-<?php echo !$db->GetSelectedPower() ? "danger active" : "default";?>">Off</a>
+      <a href="#p-1" class="btn btn-lg btn-input col-xs-6 btn-<?php echo $db->GetIsOn() ? "primary active" : "default";?>">On</a>
+      <a href="#p-0" class="btn btn-lg btn-input col-xs-6 btn-<?php echo !$db->GetIsOn() ? "danger active" : "default";?>">Off</a>
     </div>
   </div>
 

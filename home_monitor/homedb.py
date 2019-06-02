@@ -26,11 +26,16 @@ class HomeDb:
         current_power,
         selected_temperature,
         current_temperature,
-        timeout
+        timeout,
+        is_on
       FROM heater WHERE heater_id = 1''')
     return Control(*self._cur.fetchone())
 
   def update_control(self, ctl):
+    if not ctl.modified:
+      return
+
+    self._set_control('is_on', ctl.is_on)
     self._set_control('selected_power', ctl.selected_power)
     self._set_control('current_power', ctl.current_power)
     self._set_control('selected_temperature', ctl.selected_temperature)
@@ -98,12 +103,14 @@ class LogQuery:
 
 class Control:
 
-  def __init__(self, sel_power, curr_power, sel_temp, curr_temp, timeout):
+  def __init__(self, sel_power, curr_power, sel_temp, curr_temp, timeout, is_on):
     self.selected_power = sel_power
     self.current_power = curr_power
     self.selected_temperature = float(sel_temp)
     self.current_temperature = float(curr_temp)
     self.timeout = HomeDb.convert_to_datetime(timeout)
+    self.is_on = is_on
+    self.modified = False
 
 
 class Schedule:
