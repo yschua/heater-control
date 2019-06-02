@@ -10,6 +10,14 @@ CREATE TABLE IF NOT EXISTS `schedule` (
 	`is_active`	INTEGER NOT NULL DEFAULT 0,
 	FOREIGN KEY(`day_id`) REFERENCES `day`(`day_id`)
 );
+DROP TABLE IF EXISTS `on_off_cycle`;
+CREATE TABLE IF NOT EXISTS `on_off_cycle` (
+	`is_active`	INTEGER NOT NULL DEFAULT 0,
+	`on_duration`	INTEGER NOT NULL DEFAULT 0,
+	`off_duration`	INTEGER NOT NULL DEFAULT 0,
+	`last_cycle`	TEXT
+);
+INSERT INTO `on_off_cycle` (is_active,on_duration,off_duration,last_cycle) VALUES (0,20,10,NULL);
 DROP TABLE IF EXISTS `heater`;
 CREATE TABLE IF NOT EXISTS `heater` (
 	`heater_id`	INTEGER,
@@ -19,10 +27,9 @@ CREATE TABLE IF NOT EXISTS `heater` (
 	`current_temperature`	REAL NOT NULL DEFAULT 15.0,
 	`timeout`	TEXT,
 	`is_on`	INTEGER NOT NULL DEFAULT 0,
-	`cycle_time`	TEXT,
 	PRIMARY KEY(`heater_id`)
 );
-INSERT INTO `heater` (heater_id,selected_power,current_power,selected_temperature,current_temperature,timeout,is_on,cycle_time) VALUES (1,0,0,15.0,15.0,NULL,0,NULL);
+INSERT INTO `heater` (heater_id,selected_power,current_power,selected_temperature,current_temperature,timeout,is_on) VALUES (1,0,0,15.0,15.0,NULL,0);
 DROP TABLE IF EXISTS `day`;
 CREATE TABLE IF NOT EXISTS `day` (
 	`day_id`	INTEGER NOT NULL,
