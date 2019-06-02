@@ -40,8 +40,7 @@ class HomeDb:
     self._set_control('current_power', ctl.current_power)
     self._set_control('selected_temperature', ctl.selected_temperature)
     self._set_control('current_temperature', ctl.current_temperature)
-    timeout = ctl.timeout.strftime(self.DATETIME_FMT) if ctl.timeout else None
-    self._set_control('timeout', timeout)
+    self._set_control('timeout', self.convert_to_db_timestamp(ctl.timeout))
 
   def _set_control(self, field, value):
     self._cur.execute('SELECT {} FROM heater WHERE heater_id = 1'.format(field))
@@ -78,11 +77,34 @@ class HomeDb:
         'UPDATE schedule SET is_active = ? WHERE schedule_id = ?',
         (schedule.active, schedule.key))
 
+  def get_on_off_cycle(self):
+    self._cur.execute('''
+      SELECT
+        is_active,
+        on_duration,
+        off_duration,
+        last_cycle
+      FROM on_off_cycle''')
+    return OnOffCycle(*self._cur.fetchone())
+
+  def update_on_off_cycle(self, data):
+    if not data.modified:
+      return
+
+    self._modified = True
+    with self._log_query():
+      db_timestamp = self.convert_to_db_timestamp(data.last_cycle)
+      self._cur.execute('UPDATE on_off_cycle SET last_cycle = ?', (db_timestamp,))
+
   @staticmethod
-  def convert_to_datetime(datetime_str):
-    if datetime_str is None:
+  def convert_to_datetime(db_timestamp):
+    if db_timestamp is None:
       return None
-    return datetime.datetime.strptime(datetime_str, HomeDb.DATETIME_FMT)
+    return datetime.datetime.strptime(db_timestamp, HomeDb.DATETIME_FMT)
+
+  @staticmethod
+  def convert_to_db_timestamp(dt):
+    return dt.strftime(HomeDb.DATETIME_FMT) if dt else None
 
   def _log_query(self):
     return LogQuery(self._conn, self._logging)
@@ -130,3 +152,24 @@ class Schedule:
       self.name,
       self.start_time.strftime(HomeDb.TIME_FMT),
       self.end_time.strftime(HomeDb.TIME_FMT))
+
+
+class OnOffCycle:
+
+  def __init__(self, is_active, on_duration, off_duration, last_cycle):
+    self.is_active = is_active
+    self.on_duration = on_duration
+    self.off_duration = off_duration
+    self.last_cycle = HomeDb.convert_to_datetime(last_cycle)
+    self.modified = False
+
+  def set_last_cycle(self, last_cycle):
+    self.last_cycle = last_cycle
+    self.modified = True
+
+  def get_on_end_datetime(self):
+    return self.last_cycle + datetime.timedelta(minutes=self.on_duration)
+
+  def get_cycle_end(self, power):
+    duration = self.on_duration if power else self.off_duration
+    return self.last_cycle + datetime.timedelta(minutes=duration)
