@@ -1,5 +1,9 @@
 # Heater Control
 
-Moteino based controller for home heater thermostat
+ - Moteino low power wireless controller
+ - Overrides home central heating manual controller
+ - On/Off switch, temperature setting
+ - Timeout, On/Off scheduling, On/Off cycles
+ - Web browser interface
 
-![](https://user-images.githubusercontent.com/4900895/39966338-9c590b76-56ed-11e8-8de2-b0d9ed5095ba.jpg)
+![](https://user-images.githubusercontent.com/4900895/58762865-70c49c80-8597-11e9-93f9-d07829e1f873.jpg)
