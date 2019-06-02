@@ -163,6 +163,50 @@
       $stmt = $this->db->prepare("UPDATE schedule SET is_active = 0");
       $stmt->execute();
     }
+
+    /* On-Off Cycle methods */
+
+    function GetCycleActive()
+    {
+      $stmt = $this->db->prepare("SELECT is_active from on_off_cycle");
+      $result = $stmt->execute();
+      return $result->fetchArray(SQLITE3_NUM)[0];
+    }
+
+    function GetOnDuration()
+    {
+      $stmt = $this->db->prepare("SELECT on_duration from on_off_cycle");
+      $result = $stmt->execute();
+      return $result->fetchArray(SQLITE3_NUM)[0];
+    }
+
+    function GetOffDuration()
+    {
+      $stmt = $this->db->prepare("SELECT off_duration from on_off_cycle");
+      $result = $stmt->execute();
+      return $result->fetchArray(SQLITE3_NUM)[0];
+    }
+
+    function SetCycleActive($value)
+    {
+      $stmt = $this->db->prepare("UPDATE on_off_cycle SET is_active = ?");
+      $stmt->bindValue(1, $value, SQLITE3_INTEGER);
+      $stmt->execute();
+    }
+
+    function SetOnDuration($value)
+    {
+      $stmt = $this->db->prepare("UPDATE on_off_cycle SET on_duration = ?");
+      $stmt->bindValue(1, $value, SQLITE3_INTEGER);
+      $stmt->execute();
+    }
+
+    function SetOffDuration($value)
+    {
+      $stmt = $this->db->prepare("UPDATE on_off_cycle SET off_duration = ?");
+      $stmt->bindValue(1, $value, SQLITE3_INTEGER);
+      $stmt->execute();
+    }
   }
 
   $db = new Db("../db/home.db");
