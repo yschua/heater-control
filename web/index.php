@@ -71,6 +71,48 @@
 
   <hr>
 
+  <!-- On-Off Cycle control -->
+  <div class="control-item">
+    <div class="control-label">On-Off Cycle</div>
+    <div class="control-input">
+      <input class="enable-onoffcycle" type="checkbox" data-toggle="toggle"
+        <?php if ($db->GetCycleActive()) printf("checked"); ?>>
+    </div>
+  </div>
+
+  <?php
+    function DurationOptions($selected)
+    {
+      for ($min = 0; $min <= 30; $min += 5) {
+        if ($selected == $min) {
+          printf("<option id=\"%d\" selected>%d min</option>", $min, $min);
+        } else {
+          printf("<option id=\"%d\">%d min</option>", $min, $min);
+        }
+      }
+    }
+  ?>
+
+  <div class="control-item">
+    <div class="control-label">On Duration</div>
+    <div class="control-input">
+      <select class="form-control input-lg change-oncycletime">
+        <?php DurationOptions($db->GetOnDuration()); ?>
+      </select>
+    </div>
+  </div>
+
+  <div class="control-item">
+    <div class="control-label">Off Duration</div>
+    <div class="control-input">
+      <select class="form-control input-lg change-offcycletime">
+        <?php DurationOptions($db->GetOffDuration()); ?>
+      </select>
+    </div>
+  </div>
+
+  <hr>
+
   <!-- Schedules -->
   <table class="table table-schedule">
     <thead>
@@ -218,6 +260,50 @@
         "action": "enable",
         "scheduleKey": this.id,
         "value": this.checked ? 1 : 0
+      };
+      $.post(url, data);
+    });
+  });
+
+  // Enable on-off cycle
+  $(".enable-onoffcycle").bootstrapToggle({
+    on: "Active",
+    off: "Inactive",
+    size: "large",
+    width: "100%"
+  });
+  $(document).ready(function() {
+    $(".enable-onoffcycle").change(function() {
+      var url = "cycle-update.php";
+      var data = {
+        "action": "enable",
+        "value": this.checked ? 1 : 0
+      };
+      $.post(url, data);
+    });
+  });
+
+  // Change on duration
+  $(document).ready(function() {
+    $(".change-oncycletime").change(function() {
+      var duration = this[this.selectedIndex].id;
+      var url = "cycle-update.php";
+      var data = {
+        "action": "changeOn",
+        "value": duration
+      };
+      $.post(url, data);
+    });
+  });
+
+  // Change off duration
+  $(document).ready(function() {
+    $(".change-offcycletime").change(function() {
+      var duration = this[this.selectedIndex].id;
+      var url = "cycle-update.php";
+      var data = {
+        "action": "changeOff",
+        "value": duration
       };
       $.post(url, data);
     });
